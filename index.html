@@ -133,19 +133,26 @@
                 return;
             }
 
-            filteredData.forEach(item => {
+filteredData.forEach(item => {
                 const houseName = item.HOUSE_NM || item.houseNm || '단지명 정보 없음';
                 const address = item.HSSPLY_ADRES || item.hssplyAdres || '주소 정보 없음';
                 const pblancDate = item.PBLANC_PNTSN_DT || item.pblancPntsnDt || '-';
 
+                // 1. '줍줍' 감지 로직
+                const isJupJup = houseName.includes("무순위") || houseName.includes("잔여세대") || houseName.includes("취소");
+                
+                // 2. 자격 태그
                 let tag = savings < 6 ? "통장 기간 부족" : (housing === 'has' ? "유주택자 주의" : "1순위 가능");
                 let tagColor = savings < 6 ? "bg-red-100 text-red-700" : (housing === 'has' ? "bg-yellow-100 text-yellow-700" : "bg-green-100 text-green-700");
 
                 container.innerHTML += `
-                    <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex flex-col justify-between space-y-3">
+                    <div class="bg-white p-5 rounded-2xl shadow-sm border ${isJupJup ? 'border-amber-400 ring-2 ring-amber-100' : 'border-gray-100'} flex flex-col justify-between space-y-3 transition-all">
                         <div>
                             <div class="flex justify-between items-start gap-2 mb-1">
-                                <h2 class="font-bold text-sm text-gray-900">${houseName}</h2>
+                                <h2 class="font-bold text-sm text-gray-900 flex items-center gap-1">
+                                    ${isJupJup ? '<span class="bg-amber-400 text-white text-[9px] px-1.5 py-0.5 rounded-full font-bold animate-pulse">줍줍!</span>' : ''}
+                                    ${houseName}
+                                </h2>
                                 <span class="${tagColor} text-[10px] px-2 py-0.5 rounded-md font-semibold whitespace-nowrap">${tag}</span>
                             </div>
                             <p class="text-xs text-gray-500 mb-3">${address}</p>
@@ -153,8 +160,8 @@
                                 모집공고일: ${pblancDate}
                             </div>
                         </div>
-                        <a href="https://www.applyhome.co.kr" target="_blank" class="block text-center bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-xl text-xs font-semibold transition">
-                            청약홈 공지 이동
+                        <a href="https://www.applyhome.co.kr" target="_blank" class="block text-center ${isJupJup ? 'bg-amber-500 hover:bg-amber-600' : 'bg-blue-600 hover:bg-blue-700'} text-white py-2 rounded-xl text-xs font-semibold transition">
+                            ${isJupJup ? '무순위 공고 확인하기' : '청약홈 공지 이동'}
                         </a>
                     </div>
                 `;
