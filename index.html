@@ -2,87 +2,75 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>맞춤형 청약 진단 및 실시간 공고 플랫폼</title>
+    <title>AI 무료 청약 컨설팅</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-50 min-h-screen p-4 md:p-8 text-gray-800">
-    <div class="max-w-5xl mx-auto space-y-6">
+<body class="bg-gray-100 min-h-screen flex flex-col justify-between p-4 md:p-8">
+    <div class="max-w-5xl mx-auto space-y-6 w-full">
         
         <!-- Header -->
-        <header class="bg-blue-600 text-white p-6 rounded-2xl shadow-md">
-            <h1 class="text-2xl font-bold">🏠 맞춤형 청약 진단 및 지역별 공고 플랫폼</h1>
-            <p class="text-blue-100 text-sm mt-1">내 자격과 거주 지역을 설정하고 맞춤형 청약 공고를 확인하세요.</p>
+        <header class="bg-gradient-to-r from-blue-600 to-indigo-700 text-white p-6 rounded-2xl shadow-lg flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+            <div class="space-y-1">
+                <span class="bg-yellow-400 text-blue-950 text-[10px] font-extrabold px-2 py-0.5 rounded-full uppercase tracking-wider">100% 무료 AI 컨설팅</span>
+                <h1 class="text-2xl font-bold mt-1">💡 내집마련 AI 청약 컨설턴트</h1>
+                <p class="text-blue-100 text-sm">조건만 입력하시면, 내 자격에 딱 맞는 최적의 청약 공고를 무료로 분석해 드립니다.</p>
+            </div>
+            
+            <!-- 우측 여백 즐겨찾기 요약 박스 -->
+            <div class="bg-blue-900/50 border border-blue-400/30 p-3.5 rounded-xl w-full md:w-80 shadow-inner">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-xs font-bold text-yellow-300 flex items-center gap-1">⭐ 찜한 청약 바로가기</span>
+                    <span id="favCount" class="text-[10px] bg-blue-800 px-2 py-0.5 rounded-full text-blue-200">0개</span>
+                </div>
+                <div id="headerFavList" class="space-y-1.5 max-h-28 overflow-y-auto text-xs">
+                    <p class="text-blue-200 text-[11px] italic">등록된 관심 단지가 없습니다.</p>
+                </div>
+            </div>
         </header>
 
-        <!-- 사용자 자격 및 지역 진단 설정 섹션 -->
-        <section class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 space-y-4">
-            <h2 class="text-lg font-bold text-gray-900">📝 내 청약 자격 및 지역 설정</h2>
-            
-            <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
-                <div>
-                    <label class="block text-xs font-semibold text-gray-600 mb-1">거주 지역</label>
-                    <select id="userRegion" class="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white">
-                        <option value="전체">전체 (전국)</option>
-                        <option value="서울">서울특별시</option>
-                        <option value="경기">경기도</option>
-                        <option value="인천">인천광역시</option>
-                        <option value="부산">부산광역시</option>
-                        <option value="대구">대구광역시</option>
-                        <option value="대전">대전광역시</option>
-                        <option value="광주">광주광역시</option>
-                        <option value="울산">울산광역시</option>
-                        <option value="세종">세종특별자치시</option>
-                        <option value="강원">강원특별자치도</option>
-                        <option value="충북">충청북도</option>
-                        <option value="충남">충청남도</option>
-                        <option value="전북">전북특별자치도</option>
-                        <option value="전남">전라남도</option>
-                        <option value="경북">경상북도</option>
-                        <option value="경남">경상남도</option>
-                        <option value="제주">제주특별자치도</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-gray-600 mb-1">나이</label>
-                    <input type="number" id="userAge" value="28" class="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-gray-600 mb-1">주택 소유 여부</label>
-                    <select id="userHousing" class="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white">
-                        <option value="none">무주택자</option>
-                        <option value="has">유주택자</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-gray-600 mb-1">통장 가입 기간 (개월)</label>
-                    <input type="number" id="userSavingsMonths" value="26" class="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-gray-600 mb-1">연소득 (만원)</label>
-                    <input type="number" id="userIncome" value="4500" class="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
-                </div>
+        <!-- 자격 진단 섹션 -->
+        <section class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+            <div class="grid grid-cols-2 md:grid-cols-6 gap-4">
+                <select id="userRegion" class="border p-2 rounded text-sm bg-white">
+                    <option value="전체">전국</option>
+                    <option value="서울">서울</option>
+                    <option value="경기">경기</option>
+                    <option value="인천">인천</option>
+                    <option value="부산">부산</option>
+                </select>
+                <input type="number" id="userNonHomeYears" placeholder="무주택(년)" class="border p-2 rounded text-sm">
+                <input type="number" id="userSavingsYears" placeholder="통장가입(년)" class="border p-2 rounded text-sm">
+                <input type="number" id="userFamily" placeholder="부양가족(명)" class="border p-2 rounded text-sm">
+                <select id="userHousing" class="border p-2 rounded text-sm bg-white"><option value="none">무주택</option><option value="has">유주택</option></select>
+                <button onclick="render()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold rounded text-sm py-2 transition">맞춤 진단 시작</button>
             </div>
-
-            <button onclick="handleUpdate()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 rounded-lg transition text-sm shadow-sm">
-                진단 및 업데이트 적용하기
-            </button>
-            <p id="feedbackMsg" class="text-xs text-green-600 font-medium text-center hidden">✨ 자격 진단 및 지역 필터가 성공적으로 반영되었습니다!</p>
         </section>
 
-        <!-- 리스트 출력 영역 -->
+        <!-- 리스트 영역 -->
         <div id="listContainer" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div class="col-span-full bg-white p-10 rounded-2xl text-center text-gray-500 shadow-sm border border-gray-100 text-sm">
-                데이터를 불러오는 중입니다...
-            </div>
+            <div class="col-span-full bg-white p-10 rounded-2xl text-center text-gray-500 shadow-sm border text-sm">데이터를 불러오는 중입니다...</div>
         </div>
-
     </div>
+
+    <!-- 💡 개발자 정보 및 요구사항 접수용 Footer -->
+    <footer class="max-w-5xl mx-auto w-full mt-12 border-t border-gray-200 pt-6 pb-4 text-center text-xs text-gray-500 space-y-2">
+        <p class="font-semibold text-gray-700">💡 AI 무료 청약 컨설팅 오픈소스 프로젝트</p>
+        <p>
+            기능 개선 요청이나 추가적인 요구사항은 아래 메일로 보내주시면 적극 반영하겠습니다.
+        </p>
+        <p>
+            <a href="mailto:wjdrms5815@gmail.com" class="text-blue-600 font-bold hover:underline">📧 wjdrms5815@gmail.com</a>
+        </p>
+        <p class="text-[11px] text-gray-400 pt-2">
+            prod jg_6
+        </p>
+    </footer>
 
     <script>
         const API_KEY = "73d2e59ef152e8b86188255ac343a5d161f4327d8aa00f0daa8a94c86681589f";
         const URL = `https://api.odcloud.kr/api/ApplyhomeInfoDetailSvc/v1/getAPTLttotPblancDetail?serviceKey=${API_KEY}&page=1&perPage=50`;
-        
+        const TODAY = "20260819";
+
         let allData = [];
 
         async function fetchData() {
@@ -92,83 +80,112 @@
                 allData = json.data || [];
                 render();
             } catch (e) {
-                document.getElementById('listContainer').innerHTML = `
-                    <div class="col-span-full bg-red-50 text-red-600 p-6 rounded-2xl text-center border border-red-200 text-sm">
-                        데이터를 불러오지 못했습니다. 네트워크 상태를 확인해주세요.
-                    </div>
-                `;
+                console.error(e);
             }
         }
 
-        function handleUpdate() {
+        function toggleFavorite(name, url) {
+            let favorites = JSON.parse(localStorage.getItem('favList') || '{}');
+            if (favorites[name]) {
+                delete favorites[name];
+            } else {
+                favorites[name] = url;
+            }
+            localStorage.setItem('favList', JSON.stringify(favorites));
             render();
-            const msg = document.getElementById('feedbackMsg');
-            msg.classList.remove('hidden');
-            setTimeout(() => {
-                msg.classList.add('hidden');
-            }, 3000);
         }
 
-        function render() {
-            const container = document.getElementById('listContainer');
-            const selectedRegion = document.getElementById('userRegion').value;
-            const savings = parseInt(document.getElementById('userSavingsMonths').value) || 0;
-            const housing = document.getElementById('userHousing').value;
-            
-            container.innerHTML = "";
+        function renderHeaderFavorites() {
+            const favContainer = document.getElementById('headerFavList');
+            const favCountBadge = document.getElementById('favCount');
+            let favorites = JSON.parse(localStorage.getItem('favList') || '{}');
+            const keys = Object.keys(favorites);
 
-            // 지역 필터링 적용
-            const filteredData = allData.filter(item => {
-                const address = item.HSSPLY_ADRES || item.hssplyAdres || "";
-                if (selectedRegion === '전체') return true;
-                return address.includes(selectedRegion);
-            });
+            favCountBadge.innerText = `${keys.length}개`;
 
-            if (filteredData.length === 0) {
-                container.innerHTML = `
-                    <div class="col-span-full bg-white p-10 rounded-2xl text-center text-gray-500 shadow-sm border border-gray-100 text-sm">
-                        [${selectedRegion}] 지역에 해당하는 실시간 청약 공고가 없습니다. 다른 지역을 선택해 보세요.
-                    </div>
-                `;
+            if (keys.length === 0) {
+                favContainer.innerHTML = `<p class="text-blue-200 text-[11px] italic">등록된 관심 단지가 없습니다.</p>`;
                 return;
             }
 
-filteredData.forEach(item => {
-                const houseName = item.HOUSE_NM || item.houseNm || '단지명 정보 없음';
-                const address = item.HSSPLY_ADRES || item.hssplyAdres || '주소 정보 없음';
-                const pblancDate = item.PBLANC_PNTSN_DT || item.pblancPntsnDt || '-';
-
-                // 1. '줍줍' 감지 로직
-                const isJupJup = houseName.includes("무순위") || houseName.includes("잔여세대") || houseName.includes("취소");
-                
-                // 2. 자격 태그
-                let tag = savings < 6 ? "통장 기간 부족" : (housing === 'has' ? "유주택자 주의" : "1순위 가능");
-                let tagColor = savings < 6 ? "bg-red-100 text-red-700" : (housing === 'has' ? "bg-yellow-100 text-yellow-700" : "bg-green-100 text-green-700");
-
-                container.innerHTML += `
-                    <div class="bg-white p-5 rounded-2xl shadow-sm border ${isJupJup ? 'border-amber-400 ring-2 ring-amber-100' : 'border-gray-100'} flex flex-col justify-between space-y-3 transition-all">
-                        <div>
-                            <div class="flex justify-between items-start gap-2 mb-1">
-                                <h2 class="font-bold text-sm text-gray-900 flex items-center gap-1">
-                                    ${isJupJup ? '<span class="bg-amber-400 text-white text-[9px] px-1.5 py-0.5 rounded-full font-bold animate-pulse">줍줍!</span>' : ''}
-                                    ${houseName}
-                                </h2>
-                                <span class="${tagColor} text-[10px] px-2 py-0.5 rounded-md font-semibold whitespace-nowrap">${tag}</span>
-                            </div>
-                            <p class="text-xs text-gray-500 mb-3">${address}</p>
-                            <div class="text-[11px] text-gray-400 bg-gray-50 p-2 rounded-lg">
-                                모집공고일: ${pblancDate}
-                            </div>
-                        </div>
-                        <a href="https://www.applyhome.co.kr" target="_blank" class="block text-center ${isJupJup ? 'bg-amber-500 hover:bg-amber-600' : 'bg-blue-600 hover:bg-blue-700'} text-white py-2 rounded-xl text-xs font-semibold transition">
-                            ${isJupJup ? '무순위 공고 확인하기' : '청약홈 공지 이동'}
-                        </a>
+            favContainer.innerHTML = "";
+            keys.forEach(name => {
+                const url = favorites[name];
+                favContainer.innerHTML += `
+                    <div class="flex items-center justify-between bg-blue-800/40 px-2 py-1 rounded">
+                        <span class="truncate pr-2 font-medium text-white">${name}</span>
+                        <a href="${url}" target="_blank" class="bg-yellow-400 hover:bg-yellow-500 text-blue-950 font-bold px-2 py-0.5 rounded text-[10px] whitespace-nowrap transition">바로가기</a>
                     </div>
                 `;
             });
         }
 
+        function render() {
+            renderHeaderFavorites();
+
+            const container = document.getElementById('listContainer');
+            container.innerHTML = "";
+            const region = document.getElementById('userRegion').value;
+            const housing = document.getElementById('userHousing').value;
+            const family = parseInt(document.getElementById('userFamily').value) || 0;
+            
+            let favorites = JSON.parse(localStorage.getItem('favList') || '{}');
+
+            const filteredData = allData.filter(item => {
+                const address = item.HSSPLY_ADRES || item.hssplyAdres || "";
+                const endDate = (item.RCEPT_ENDDE || item.rceptEndde || "99999999").replace(/[^0-9]/g, '');
+                return (endDate >= TODAY) && (region === '전체' || address.includes(region));
+            }).sort((a, b) => {
+                const jupA = (a.HOUSE_NM || "").includes("무순위");
+                const jupB = (b.HOUSE_NM || "").includes("무순위");
+                return jupB - jupA || (a.RCEPT_ENDDE || "").localeCompare(b.RCEPT_ENDDE || "");
+            });
+
+            if (filteredData.length === 0) {
+                container.innerHTML = `<div class="col-span-full bg-white p-10 rounded-2xl text-center text-gray-500 shadow-sm border text-sm">조건에 맞는 진행 중인 공고가 없습니다.</div>`;
+                return;
+            }
+
+            filteredData.forEach(item => {
+                const name = item.HOUSE_NM || item.houseNm || '정보없음';
+                const pblancUrl = item.PBLANC_URL || 'https://www.applyhome.co.kr';
+                const end = (item.RCEPT_ENDDE || "").replace(/[^0-9]/g, '');
+                
+                let dDayText = "마감";
+                if (end.length === 8) {
+                    const endDateObj = new Date(end.replace(/(\d{4})(\d{2})(\d{2})/, '$1-$2-$3'));
+                    const todayObj = new Date(TODAY.replace(/(\d{4})(\d{2})(\d{2})/, '$1-$2-$3'));
+                    const diffDays = Math.ceil((endDateObj - todayObj) / (1000 * 60 * 60 * 24));
+                    dDayText = diffDays >= 0 ? `D-${diffDays}` : "마감";
+                }
+
+                const score = (housing === 'none' ? 3 : 1) + (family > 0 ? 2 : 0);
+                const isFav = favorites[name] !== undefined;
+                const isJupJup = name.includes("무순위");
+
+                container.innerHTML += `
+                    <div class="bg-white p-5 rounded-2xl border ${isJupJup ? 'border-amber-400 ring-2 ring-amber-100' : 'border-gray-100'} shadow-sm flex flex-col justify-between space-y-3">
+                        <div>
+                            <div class="flex justify-between items-start mb-2">
+                                <h2 class="font-bold text-sm text-gray-900">${isJupJup ? '✨ 줍줍 ' : ''} ${name}</h2>
+                                <button onclick="toggleFavorite('${name}', '${pblancUrl}')" class="text-xl transition transform active:scale-125">${isFav ? '⭐' : '☆'}</button>
+                            </div>
+                            <div class="flex gap-2 text-[10px] mb-2">
+                                <span class="bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded font-bold">AI 적합도: ${score}/5점</span>
+                                <span class="bg-red-100 text-red-700 px-2 py-0.5 rounded font-bold">${dDayText}</span>
+                            </div>
+                            <p class="text-xs text-gray-500 mb-2">${item.HSSPLY_ADRES || '주소없음'}</p>
+                            <div class="text-[11px] bg-blue-50 text-blue-700 p-2 rounded font-bold">
+                                접수기간: ${item.RCEPT_BGNDE || '-'} ~ ${item.RCEPT_ENDDE || '-'}
+                            </div>
+                        </div>
+                        <a href="${pblancUrl}" target="_blank" class="block text-center ${isJupJup ? 'bg-amber-500 hover:bg-amber-600' : 'bg-blue-600 hover:bg-blue-700'} text-white py-2 rounded-xl text-xs font-semibold transition">공고 원문 보기</a>
+                    </div>
+                `;
+            });
+        }
         fetchData();
     </script>
 </body>
 </html>
+<!-- prod jg_6 -->
