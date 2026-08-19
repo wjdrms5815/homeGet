@@ -3,38 +3,84 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>청약 통합 분석 시스템</title>
+    <title>맞춤형 청약 진단 및 실시간 공고 플랫폼</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-50 min-h-screen p-4 md:p-8 text-gray-800">
     <div class="max-w-5xl mx-auto space-y-6">
+        
+        <!-- Header -->
         <header class="bg-blue-600 text-white p-6 rounded-2xl shadow-md">
-            <h1 class="text-2xl font-bold">🏠 맞춤형 청약 진단 및 실시간 공고 플랫폼</h1>
-            <p class="text-blue-100 text-sm mt-1">내 자격을 입력하고 실시간 청약 공고를 확인하세요.</p>
+            <h1 class="text-2xl font-bold">🏠 맞춤형 청약 진단 및 지역별 공고 플랫폼</h1>
+            <p class="text-blue-100 text-sm mt-1">내 자격과 거주 지역을 설정하고 맞춤형 청약 공고를 확인하세요.</p>
         </header>
 
-        <section class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-            <h2 class="text-lg font-bold mb-4 text-gray-900">📝 내 청약 자격 진단 설정</h2>
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <input type="number" id="userAge" placeholder="나이" value="28" class="w-full border border-gray-300 rounded-lg p-2 text-sm">
-                <select id="userHousing" class="w-full border border-gray-300 rounded-lg p-2 text-sm">
-                    <option value="none">무주택자</option>
-                    <option value="has">유주택자</option>
-                </select>
-                <input type="number" id="userSavingsMonths" placeholder="통장 가입기간(개월)" value="26" class="w-full border border-gray-300 rounded-lg p-2 text-sm">
-                <input type="number" id="userIncome" placeholder="연소득(만원)" value="4500" class="w-full border border-gray-300 rounded-lg p-2 text-sm">
+        <!-- 사용자 자격 및 지역 진단 설정 섹션 -->
+        <section class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 space-y-4">
+            <h2 class="text-lg font-bold text-gray-900">📝 내 청약 자격 및 지역 설정</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 mb-1">거주 지역</label>
+                    <select id="userRegion" class="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white">
+                        <option value="전체">전체 (전국)</option>
+                        <option value="서울">서울특별시</option>
+                        <option value="경기">경기도</option>
+                        <option value="인천">인천광역시</option>
+                        <option value="부산">부산광역시</option>
+                        <option value="대구">대구광역시</option>
+                        <option value="대전">대전광역시</option>
+                        <option value="광주">광주광역시</option>
+                        <option value="울산">울산광역시</option>
+                        <option value="세종">세종특별자치시</option>
+                        <option value="강원">강원특별자치도</option>
+                        <option value="충북">충청북도</option>
+                        <option value="충남">충청남도</option>
+                        <option value="전북">전북특별자치도</option>
+                        <option value="전남">전라남도</option>
+                        <option value="경북">경상북도</option>
+                        <option value="경남">경상남도</option>
+                        <option value="제주">제주특별자치도</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 mb-1">나이</label>
+                    <input type="number" id="userAge" value="28" class="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 mb-1">주택 소유 여부</label>
+                    <select id="userHousing" class="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white">
+                        <option value="none">무주택자</option>
+                        <option value="has">유주택자</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 mb-1">통장 가입 기간 (개월)</label>
+                    <input type="number" id="userSavingsMonths" value="26" class="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 mb-1">연소득 (만원)</label>
+                    <input type="number" id="userIncome" value="4500" class="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                </div>
             </div>
-            <button onclick="render()" class="mt-4 w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded-lg transition text-sm">진단 및 업데이트</button>
+
+            <button onclick="handleUpdate()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 rounded-lg transition text-sm shadow-sm">
+                진단 및 업데이트 적용하기
+            </button>
+            <p id="feedbackMsg" class="text-xs text-green-600 font-medium text-center hidden">✨ 자격 진단 및 지역 필터가 성공적으로 반영되었습니다!</p>
         </section>
 
+        <!-- 리스트 출력 영역 -->
         <div id="listContainer" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div class="col-span-full text-center p-10 text-gray-500">데이터를 불러오는 중입니다...</div>
+            <div class="col-span-full bg-white p-10 rounded-2xl text-center text-gray-500 shadow-sm border border-gray-100 text-sm">
+                데이터를 불러오는 중입니다...
+            </div>
         </div>
+
     </div>
 
     <script>
         const API_KEY = "73d2e59ef152e8b86188255ac343a5d161f4327d8aa00f0daa8a94c86681589f";
-        // 정상 작동하는 URL로 수정 완료
         const URL = `https://api.odcloud.kr/api/ApplyhomeInfoDetailSvc/v1/getAPTLttotPblancDetail?serviceKey=${API_KEY}&page=1&perPage=50`;
         
         let allData = [];
@@ -46,33 +92,75 @@
                 allData = json.data || [];
                 render();
             } catch (e) {
-                console.error(e);
+                document.getElementById('listContainer').innerHTML = `
+                    <div class="col-span-full bg-red-50 text-red-600 p-6 rounded-2xl text-center border border-red-200 text-sm">
+                        데이터를 불러오지 못했습니다. 네트워크 상태를 확인해주세요.
+                    </div>
+                `;
             }
+        }
+
+        function handleUpdate() {
+            render();
+            const msg = document.getElementById('feedbackMsg');
+            msg.classList.remove('hidden');
+            setTimeout(() => {
+                msg.classList.add('hidden');
+            }, 3000);
         }
 
         function render() {
             const container = document.getElementById('listContainer');
+            const selectedRegion = document.getElementById('userRegion').value;
             const savings = parseInt(document.getElementById('userSavingsMonths').value) || 0;
             const housing = document.getElementById('userHousing').value;
             
             container.innerHTML = "";
-            allData.forEach((item, index) => {
+
+            // 지역 필터링 적용
+            const filteredData = allData.filter(item => {
+                const address = item.HSSPLY_ADRES || item.hssplyAdres || "";
+                if (selectedRegion === '전체') return true;
+                return address.includes(selectedRegion);
+            });
+
+            if (filteredData.length === 0) {
+                container.innerHTML = `
+                    <div class="col-span-full bg-white p-10 rounded-2xl text-center text-gray-500 shadow-sm border border-gray-100 text-sm">
+                        [${selectedRegion}] 지역에 해당하는 실시간 청약 공고가 없습니다. 다른 지역을 선택해 보세요.
+                    </div>
+                `;
+                return;
+            }
+
+            filteredData.forEach(item => {
+                const houseName = item.HOUSE_NM || item.houseNm || '단지명 정보 없음';
+                const address = item.HSSPLY_ADRES || item.hssplyAdres || '주소 정보 없음';
+                const pblancDate = item.PBLANC_PNTSN_DT || item.pblancPntsnDt || '-';
+
                 let tag = savings < 6 ? "통장 기간 부족" : (housing === 'has' ? "유주택자 주의" : "1순위 가능");
                 let tagColor = savings < 6 ? "bg-red-100 text-red-700" : (housing === 'has' ? "bg-yellow-100 text-yellow-700" : "bg-green-100 text-green-700");
 
                 container.innerHTML += `
-                    <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100">
-                        <div class="flex justify-between mb-2">
-                            <h2 class="font-bold text-sm">${item.houseNm || '정보없음'}</h2>
-                            <span class="${tagColor} text-[10px] px-2 py-1 rounded-md font-medium">${tag}</span>
+                    <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex flex-col justify-between space-y-3">
+                        <div>
+                            <div class="flex justify-between items-start gap-2 mb-1">
+                                <h2 class="font-bold text-sm text-gray-900">${houseName}</h2>
+                                <span class="${tagColor} text-[10px] px-2 py-0.5 rounded-md font-semibold whitespace-nowrap">${tag}</span>
+                            </div>
+                            <p class="text-xs text-gray-500 mb-3">${address}</p>
+                            <div class="text-[11px] text-gray-400 bg-gray-50 p-2 rounded-lg">
+                                모집공고일: ${pblancDate}
+                            </div>
                         </div>
-                        <p class="text-[11px] text-gray-500 mb-2">${item.hssplyAdres || '주소없음'}</p>
-                        <div class="text-[11px] text-gray-400">모집공고일: ${item.pblancPntsnDt || '-'}</div>
-                        <a href="https://www.applyhome.co.kr" target="_blank" class="block mt-4 text-center bg-blue-600 text-white py-2 rounded-lg text-xs font-bold">상세보기</a>
+                        <a href="https://www.applyhome.co.kr" target="_blank" class="block text-center bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-xl text-xs font-semibold transition">
+                            청약홈 공지 이동
+                        </a>
                     </div>
                 `;
             });
         }
+
         fetchData();
     </script>
 </body>
