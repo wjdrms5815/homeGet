@@ -3,198 +3,71 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>청약 한눈에 요약 - 세대별 자금 및 자격 조건 분석</title>
+    <title>청약 정보 알리미</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-50 text-gray-800 font-sans">
-
-    <!-- Header -->
-    <header class="bg-blue-600 text-white py-6 shadow-md">
-        <div class="container mx-auto px-4 text-center">
-            <h1 class="text-2xl font-bold">🏠 HomeGet [청약 공고 3초 요약]</h1>
-            <p class="text-blue-100 text-sm mt-1">세대별 필요 자금, 자격 요건, 거주의무를 한눈에 확인하세요.</p>
-        </div>
-    </header>
-
-    <!-- Main Container -->
-    <main class="container mx-auto px-4 py-8 max-w-4xl">
+<body class="bg-gray-50 min-h-screen p-4 md:p-8">
+    <div class="max-w-5xl mx-auto">
+        <h1 class="text-3xl font-bold text-gray-900 mb-6">🏠 실시간 청약 정보</h1>
         
-        <!-- Search Box Section -->
-        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 mb-8">
-            <label for="aptSelect" class="block text-sm font-semibold text-gray-700 mb-2">최근 분양 공고 선택 또는 링크 입력</label>
-            <div class="flex gap-2">
-                <select id="aptSelect" class="flex-1 border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <option value="">-- 분양 단지를 선택하세요 (청약홈 API 연동 영역) --</option>
-                    <option value="sample1">힐스테이트 더샵 (가상 예시 데이터)</option>
-                    <option value="sample2">래미안 푸르지오 (가상 예시 데이터)</option>
-                </select>
-                <button onclick="loadAptData()" class="bg-blue-600 hover:bg-blue-700 text-white font-medium px-6 py-2 rounded-lg transition">
-                    분석하기
-                </button>
-            </div>
-            <p class="text-xs text-gray-400 mt-2">* 공공데이터포털 청약홈 API 및 AI 파싱 엔진과 연동될 예정입니다.</p>
+        <!-- 탭 메뉴 -->
+        <div class="flex space-x-2 mb-6 bg-white p-1 rounded-lg shadow-sm border border-gray-200">
+            <button onclick="render('RUNNING')" class="flex-1 py-2 font-semibold text-blue-600 bg-blue-50 rounded-md">진행 중</button>
+            <button onclick="render('PLANNED')" class="flex-1 py-2 font-semibold text-gray-600 hover:bg-gray-50 rounded-md">청약 예정</button>
+            <button onclick="render('FINISHED')" class="flex-1 py-2 font-semibold text-gray-600 hover:bg-gray-50 rounded-md">결과 발표</button>
         </div>
 
-        <!-- Result Section (Hidden by default) -->
-        <div id="resultSection" class="space-y-6 hidden">
-            
-            <!-- 단지 기본 정보 카드 -->
-            <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex justify-between items-center">
-                <div>
-                    <span id="resStatus" class="bg-green-100 text-green-800 text-xs font-semibold px-2.5 py-0.5 rounded">접수중</span>
-                    <h2 id="resTitle" class="text-xl font-bold text-gray-900 mt-1">아파트 이름</h2>
-                    <p id="resDate" class="text-sm text-gray-500 mt-1">청약 일정: 2026.03.10 ~ 2026.03.12</p>
-                </div>
-                <div class="text-right">
-                    <span class="text-xs text-gray-400 block">공급 위치</span>
-                    <span id="resLocation" class="text-sm font-medium text-gray-700">서울시 강남구</span>
-                </div>
-            </div>
-
-            <!-- 1. 세대별 필요 자금 및 납부 일정 -->
-            <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-                <h3 class="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-                    💰 세대별 필요 자금 및 납부 일정
-                </h3>
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left border-collapse">
-                        <thead>
-                            <tr class="bg-gray-100 text-xs text-gray-600 uppercase">
-                                <th class="p-3 rounded-l-lg">주택형 (평형)</th>
-                                <th class="p-3">분양가 최고가</th>
-                                <th class="p-3">계약금 (10%)</th>
-                                <th class="p-3">중도금 (60%)</th>
-                                <th class="p-3 rounded-r-lg">잔금 (30%)</th>
-                            </tr>
-                        </thead>
-                        <tbody id="financeTableBody" class="text-sm text-gray-700">
-                            <!-- 데이터 동적 삽입 -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <!-- 2. 핵심 자격 요건 -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-                    <h3 class="text-base font-bold text-gray-900 mb-3">🎯 청약 자격 요건</h3>
-                    <ul id="qualificationList" class="space-y-2 text-sm text-gray-600">
-                        <!-- 동적 삽입 -->
-                    </ul>
-                </div>
-                
-                <!-- 3. 규제 및 거주의무 정보 -->
-                <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-                    <h3 class="text-base font-bold text-gray-900 mb-3">⚖️ 규제 및 제한 사항</h3>
-                    <ul id="regulationList" class="space-y-2 text-sm text-gray-600">
-                        <!-- 동적 삽입 -->
-                    </ul>
-                </div>
-            </div>
-
+        <!-- 리스트 영역 -->
+        <div id="list" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <p class="text-gray-500">데이터를 불러오는 중입니다...</p>
         </div>
+    </div>
 
-    </main>
-
-    <!-- Footer -->
-    <footer class="text-center py-6 text-xs text-gray-400">
-        prod by jg_6
-    </main>
-
-    <!-- JavaScript 로직 -->
     <script>
-        // 가상의 데이터베이스 (나중에는 API 및 AI 파싱 결과로 대체)
-        const mockData = {
-            "sample1": {
-                status: "청약 접수중",
-                title: "힐스테이트 더샵 파크",
-                date: "2026.03.10 ~ 2026.03.12",
-                location: "인천광역시 서구 청라동",
-                finances: [
-                    { type: "84㎡ A", price: "5억 5,000만", contract: "5,500만", mid: "3억 3,000만", balance: "1억 6,500만" },
-                    { type: "59㎡ B", price: "4억 2,000만", contract: "4,200만", mid: "2억 5,200만", balance: "1억 2,600만" }
-                ],
-                qualifications: [
-                    "입주자모집공고일 현재 수도권 거주자",
-                    "청약통장 가입기간 12개월 이상 및 지역별 예치금 충족",
-                    "세대주 및 세대원 모두 1순위 청약 가능 (주택 소유 무관)"
-                ],
-                regulations: [
-                    "전매제한기간: 당첨자 발표일로부터 1년",
-                    "거주의무기간: 없음",
-                    "재당첨제한: 10년간 제한"
-                ]
-            },
-            "sample2": {
-                status: "공고 예정",
-                title: "래미안 푸르지오 센트럴",
-                date: "2026.03.25 ~ 2026.03.27",
-                location: "경기도 성남시 수정구",
-                finances: [
-                    { type: "84㎡", price: "9억 8,000만", contract: "9,800만", mid: "5억 8,800만", balance: "2억 9,400만" }
-                ],
-                qualifications: [
-                    "입주자모집공고일 현재 성남시 거주자 우선 공급",
-                    "무주택자 또는 1주택자 (추첨제 물량 존재)",
-                    "청약통장 24개월 이상 납입 필수"
-                ],
-                regulations: [
-                    "전매제한기간: 3년",
-                    "거주의무기간: 최초 입주일로부터 3년",
-                    "분양가상한제 적용 지역"
-                ]
+        const API_KEY = "73d2e59ef152e8b86188255ac343a5d161f4327d8aa00f0daa8a94c86681589f";
+        const URL = `https://api.odcloud.kr/api/ApplyhomeInfo/v1/getAptList?serviceKey=${API_KEY}&page=1&perPage=50`;
+        
+        let allData = [];
+
+        async function fetchData() {
+            try {
+                const res = await fetch(URL);
+                const json = await res.json();
+                allData = json.data;
+                render('RUNNING');
+            } catch (e) {
+                document.getElementById('list').innerHTML = `<p class="text-red-500">데이터를 불러오지 못했습니다. API 키를 확인해주세요.</p>`;
             }
-        };
+        }
 
-        function loadAptData() {
-            const selectVal = document.getElementById("aptSelect").value;
-            const resultSection = document.getElementById("resultSection");
+        function render(status) {
+            const list = document.getElementById('list');
+            const today = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+            list.innerHTML = "";
 
-            if (!selectVal) {
-                alert("분양 단지를 선택해주세요!");
-                return;
-            }
+            const filtered = allData.filter(item => {
+                const start = item.rceptBgnde; // YYYYMMDD
+                const end = item.rceptEndde;
+                if (status === 'RUNNING') return start <= today && today <= end;
+                if (status === 'PLANNED') return start > today;
+                if (status === 'FINISHED') return end < today;
+            });
 
-            const data = mockData[selectVal];
-
-            // 데이터 렌더링
-            document.getElementById("resStatus").innerText = data.status;
-            document.getElementById("resTitle").innerText = data.title;
-            document.getElementById("resDate").innerText = `청약 일정: ${data.date}`;
-            document.getElementById("resLocation").innerText = data.location;
-
-            // 자금 테이블 렌더링
-            const financeTableBody = document.getElementById("financeTableBody");
-            financeTableBody.innerHTML = "";
-            data.finances.forEach(item => {
-                financeTableBody.innerHTML += `
-                    <tr class="border-b border-gray-100">
-                        <td class="p-3 font-medium text-gray-900">${item.type}</td>
-                        <td class="p-3 text-blue-600 font-semibold">${item.price}</td>
-                        <td class="p-3">${item.contract}</td>
-                        <td class="p-3">${item.mid}</td>
-                        <td class="p-3">${item.balance}</td>
-                    </tr>
+            filtered.forEach(item => {
+                const link = "https://www.applyhome.co.kr"; // 실제 상세 페이지로 연결하려면 API의 상세 코드 필요
+                list.innerHTML += `
+                    <div class="bg-white p-5 rounded-xl shadow-sm border border-gray-100">
+                        <h2 class="font-bold text-lg mb-1">${item.houseNm}</h2>
+                        <p class="text-sm text-gray-600 mb-2">${item.hssplyAdres}</p>
+                        <div class="flex justify-between items-center mt-4">
+                            <span class="text-xs text-gray-400">${item.rceptBgnde} ~ ${item.rceptEndde}</span>
+                            <a href="${link}" target="_blank" class="bg-blue-600 text-white text-xs px-3 py-1 rounded-full hover:bg-blue-700">바로가기</a>
+                        </div>
+                    </div>
                 `;
             });
-
-            // 자격 요건 렌더링
-            const qualList = document.getElementById("qualificationList");
-            qualList.innerHTML = "";
-            data.qualifications.forEach(q => {
-                qualList.innerHTML += `<li class="flex items-start gap-2"><span class="text-blue-500 font-bold">•</span> ${q}</li>`;
-            });
-
-            // 규제 요건 렌더링
-            const regList = document.getElementById("regulationList");
-            regList.innerHTML = "";
-            data.regulations.forEach(r => {
-                regList.innerHTML += `<li class="flex items-start gap-2"><span class="text-orange-500 font-bold">•</span> ${r}</li>`;
-            });
-
-            // 결과 화면 표시
-            resultSection.classList.remove("hidden");
         }
+        fetchData();
     </script>
 </body>
 </html>
