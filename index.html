@@ -106,7 +106,7 @@
                     🎯 나의 청약 조건
                 </h2>
                 <p class="text-xs text-gray-500 mt-1">
-                    조건을 입력하면 공고별 청약 적합도를 자동 계산합니다.
+                    조건을 입력하면 공고별 청약 적합도를 자동 계산합니다. (희망 지역 복수 선택 가능)
                 </p>
             </div>
             <div class="flex gap-2">
@@ -119,30 +119,66 @@
             </div>
         </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
-            <!-- 지역 -->
-            <div>
-                <label for="userRegion" class="block text-[11px] font-bold text-gray-500 mb-1">희망 지역</label>
-                <select id="userRegion" class="w-full border border-gray-200 p-2.5 rounded-lg text-sm bg-white focus:ring-2 focus:ring-blue-200 outline-none">
-                    <option value="전체">전국 전체</option>
-                    <option value="서울">서울특별시</option>
-                    <option value="경기">경기도</option>
-                    <option value="인천">인천광역시</option>
-                    <option value="부산">부산광역시</option>
-                    <option value="대구">대구광역시</option>
-                    <option value="대전">대전광역시</option>
-                    <option value="광주">광주광역시</option>
-                    <option value="울산">울산광역시</option>
-                    <option value="세종">세종특별자치시</option>
-                    <option value="강원">강원특별자치도</option>
-                    <option value="충북">충청북도</option>
-                    <option value="충남">충청남도</option>
-                    <option value="전북">전북특별자치도</option>
-                    <option value="전남">전라남도</option>
-                    <option value="경북">경상북도</option>
-                    <option value="경남">경상남도</option>
-                    <option value="제주">제주특별자치도</option>
-                </select>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <!-- 지역 복수 선택 영역 -->
+            <div class="col-span-full">
+                <label class="block text-[11px] font-bold text-gray-500 mb-2">희망 지역 (복수 선택)</label>
+                <div class="flex flex-wrap gap-2 p-3 bg-gray-50 rounded-xl border border-gray-200" id="regionCheckboxContainer">
+                    <label class="inline-flex items-center gap-1.5 text-xs bg-white px-2.5 py-1.5 rounded-lg border border-gray-200 cursor-pointer hover:bg-blue-50">
+                        <input type="checkbox" value="전체" class="region-chk text-blue-600 rounded" checked> 전국 전체
+                    </label>
+                    <label class="inline-flex items-center gap-1.5 text-xs bg-white px-2.5 py-1.5 rounded-lg border border-gray-200 cursor-pointer hover:bg-blue-50">
+                        <input type="checkbox" value="서울" class="region-chk text-blue-600 rounded"> 서울특별시
+                    </label>
+                    <label class="inline-flex items-center gap-1.5 text-xs bg-white px-2.5 py-1.5 rounded-lg border border-gray-200 cursor-pointer hover:bg-blue-50">
+                        <input type="checkbox" value="경기" class="region-chk text-blue-600 rounded"> 경기도
+                    </label>
+                    <label class="inline-flex items-center gap-1.5 text-xs bg-white px-2.5 py-1.5 rounded-lg border border-gray-200 cursor-pointer hover:bg-blue-50">
+                        <input type="checkbox" value="인천" class="region-chk text-blue-600 rounded"> 인천광역시
+                    </label>
+                    <label class="inline-flex items-center gap-1.5 text-xs bg-white px-2.5 py-1.5 rounded-lg border border-gray-200 cursor-pointer hover:bg-blue-50">
+                        <input type="checkbox" value="부산" class="region-chk text-blue-600 rounded"> 부산광역시
+                    </label>
+                    <label class="inline-flex items-center gap-1.5 text-xs bg-white px-2.5 py-1.5 rounded-lg border border-gray-200 cursor-pointer hover:bg-blue-50">
+                        <input type="checkbox" value="대구" class="region-chk text-blue-600 rounded"> 대구광역시
+                    </label>
+                    <label class="inline-flex items-center gap-1.5 text-xs bg-white px-2.5 py-1.5 rounded-lg border border-gray-200 cursor-pointer hover:bg-blue-50">
+                        <input type="checkbox" value="대전" class="region-chk text-blue-600 rounded"> 대전광역시
+                    </label>
+                    <label class="inline-flex items-center gap-1.5 text-xs bg-white px-2.5 py-1.5 rounded-lg border border-gray-200 cursor-pointer hover:bg-blue-50">
+                        <input type="checkbox" value="광주" class="region-chk text-blue-600 rounded"> 광주광역시
+                    </label>
+                    <label class="inline-flex items-center gap-1.5 text-xs bg-white px-2.5 py-1.5 rounded-lg border border-gray-200 cursor-pointer hover:bg-blue-50">
+                        <input type="checkbox" value="울산" class="region-chk text-blue-600 rounded"> 울산광역시
+                    </label>
+                    <label class="inline-flex items-center gap-1.5 text-xs bg-white px-2.5 py-1.5 rounded-lg border border-gray-200 cursor-pointer hover:bg-blue-50">
+                        <input type="checkbox" value="세종" class="region-chk text-blue-600 rounded"> 세종특별자치시
+                    </label>
+                    <label class="inline-flex items-center gap-1.5 text-xs bg-white px-2.5 py-1.5 rounded-lg border border-gray-200 cursor-pointer hover:bg-blue-50">
+                        <input type="checkbox" value="강원" class="region-chk text-blue-600 rounded"> 강원특별자치도
+                    </label>
+                    <label class="inline-flex items-center gap-1.5 text-xs bg-white px-2.5 py-1.5 rounded-lg border border-gray-200 cursor-pointer hover:bg-blue-50">
+                        <input type="checkbox" value="충북" class="region-chk text-blue-600 rounded"> 충청북도
+                    </label>
+                    <label class="inline-flex items-center gap-1.5 text-xs bg-white px-2.5 py-1.5 rounded-lg border border-gray-200 cursor-pointer hover:bg-blue-50">
+                        <input type="checkbox" value="충남" class="region-chk text-blue-600 rounded"> 충청남도
+                    </label>
+                    <label class="inline-flex items-center gap-1.5 text-xs bg-white px-2.5 py-1.5 rounded-lg border border-gray-200 cursor-pointer hover:bg-blue-50">
+                        <input type="checkbox" value="전북" class="region-chk text-blue-600 rounded"> 전북특별자치도
+                    </label>
+                    <label class="inline-flex items-center gap-1.5 text-xs bg-white px-2.5 py-1.5 rounded-lg border border-gray-200 cursor-pointer hover:bg-blue-50">
+                        <input type="checkbox" value="전남" class="region-chk text-blue-600 rounded"> 전라남도
+                    </label>
+                    <label class="inline-flex items-center gap-1.5 text-xs bg-white px-2.5 py-1.5 rounded-lg border border-gray-200 cursor-pointer hover:bg-blue-50">
+                        <input type="checkbox" value="경북" class="region-chk text-blue-600 rounded"> 경상북도
+                    </label>
+                    <label class="inline-flex items-center gap-1.5 text-xs bg-white px-2.5 py-1.5 rounded-lg border border-gray-200 cursor-pointer hover:bg-blue-50">
+                        <input type="checkbox" value="경남" class="region-chk text-blue-600 rounded"> 경상남도
+                    </label>
+                    <label class="inline-flex items-center gap-1.5 text-xs bg-white px-2.5 py-1.5 rounded-lg border border-gray-200 cursor-pointer hover:bg-blue-50">
+                        <input type="checkbox" value="제주" class="region-chk text-blue-600 rounded"> 제주특별자치도
+                    </label>
+                </div>
             </div>
 
             <!-- 무주택 기간 -->
@@ -203,6 +239,7 @@
                 <button type="button" class="filter-btn active" data-filter="all">전체</button>
                 <button type="button" class="filter-btn" data-filter="urgent">🔴 마감임박</button>
                 <button type="button" class="filter-btn" data-filter="special">✨ 무순위</button>
+                <button type="button" class="filter-btn" data-filter="recommend">💡 타지역 유리한 공고</button>
                 <button type="button" class="filter-btn" data-filter="favorite">⭐ 관심공고</button>
             </div>
         </div>
@@ -241,9 +278,7 @@
    API
 ========================================================= */
 const API_KEY = "73d2e59ef152e8b86188255ac343a5d161f4327d8aa00f0daa8a94c86681589f";
-
 const API_URL = "https://api.odcloud.kr/api/ApplyhomeInfoDetailSvc/v1/getAPTLttotPblancDetail?serviceKey=" + encodeURIComponent(API_KEY) + "&page=1&perPage=100";
-
 const MODEL_API_URL = "https://api.odcloud.kr/api/ApplyhomeInfoDetailSvc/v1/getAPTLttotPblancMdl?serviceKey=" + encodeURIComponent(API_KEY) + "&page=1&perPage=50&cond[HOUSE_MANAGE_NO::EQ]=";
 
 /* =========================================================
@@ -342,7 +377,7 @@ function getHouseManageNo(item) {
 }
 
 /* =========================================================
-   모델 API를 통한 분양가 포맷터 (만원 단위를 억/천만 원 단위로 변환)
+   모델 API를 통한 분양가 및 면적 조회
 ========================================================= */
 async function fetchModelDetails(houseManageNo) {
     if (!houseManageNo) return [];
@@ -367,7 +402,6 @@ function formatKoreanPrice(value) {
     const num = Number(raw);
     if (!Number.isFinite(num) || num === 0) return String(value);
 
-    // API 분양가 데이터(만원 단위 가정) -> 실제 원화 환산
     const uk = Math.floor(num / 10000);
     const remainder = num % 10000;
 
@@ -458,11 +492,14 @@ function isJupJup(item) {
 }
 
 /* =========================================================
-   사용자 조건 관리
+   사용자 조건 관리 (복수 지역 지원 + 상호 배타적 체크박스 로직)
 ========================================================= */
 function getUserCondition() {
+    const checkboxes = document.querySelectorAll(".region-chk:checked");
+    const selectedRegions = Array.from(checkboxes).map(cb => cb.value);
+
     return {
-        region: document.getElementById("userRegion").value,
+        regions: selectedRegions.length > 0 ? selectedRegions : ["전체"],
         nonHomeYears: Number(document.getElementById("userNonHomeYears").value) || 0,
         savingsYears: Number(document.getElementById("userSavingsYears").value) || 0,
         family: Number(document.getElementById("userFamily").value) || 0,
@@ -474,7 +511,7 @@ function updateConditionSummary() {
     const condition = getUserCondition();
     const housingText = condition.housing === "none" ? "무주택" : "유주택";
     document.getElementById("conditionSummary").innerHTML = `
-        현재 조건: <strong class="text-gray-700">${escapeHtml(condition.region)}</strong>
+        현재 조건: <strong class="text-gray-700">${escapeHtml(condition.regions.join(", "))}</strong>
         · ${condition.nonHomeYears}년 무주택
         · 통장 ${condition.savingsYears}년
         · 부양가족 ${condition.family}명
@@ -497,7 +534,11 @@ function loadCondition() {
     }
     try {
         const condition = JSON.parse(saved);
-        document.getElementById("userRegion").value = condition.region || "전체";
+        if (condition.regions && Array.isArray(condition.regions)) {
+            document.querySelectorAll(".region-chk").forEach(cb => {
+                cb.checked = condition.regions.includes(cb.value);
+            });
+        }
         document.getElementById("userNonHomeYears").value = condition.nonHomeYears || "";
         document.getElementById("userSavingsYears").value = condition.savingsYears || "";
         document.getElementById("userFamily").value = condition.family || "";
@@ -509,7 +550,9 @@ function loadCondition() {
 }
 
 function resetCondition() {
-    document.getElementById("userRegion").value = "전체";
+    document.querySelectorAll(".region-chk").forEach((cb, idx) => {
+        cb.checked = (idx === 0); // "전체"만 체크
+    });
     document.getElementById("userNonHomeYears").value = "";
     document.getElementById("userSavingsYears").value = "";
     document.getElementById("userFamily").value = "";
@@ -520,11 +563,14 @@ function resetCondition() {
 }
 
 /* =========================================================
-   AI 점수 및 등급
+   AI 점수 및 타지역 유리한 공고 판별
 ========================================================= */
 function calculateScore(item, condition) {
     let score = 50;
     const reasons = [];
+    const address = getAnnouncementAddress(item);
+
+    const isMatchedRegion = condition.regions.includes("전체") || condition.regions.some(r => address.includes(r));
 
     if (condition.housing === "none") {
         score += 15;
@@ -558,10 +604,14 @@ function calculateScore(item, condition) {
         reasons.push("부양가족이 있어 가점제 측면에서 일부 유리할 수 있습니다.");
     }
 
-    const address = getAnnouncementAddress(item);
-    if (condition.region !== "전체" && address.includes(condition.region)) {
+    if (isMatchedRegion) {
         score += 8;
         reasons.push("희망 지역과 공고 지역이 일치합니다.");
+    } else {
+        if (isJupJup(item) || (condition.nonHomeYears >= 5 && condition.savingsYears >= 5)) {
+            score += 6;
+            reasons.push("💡 희망 지역 외 지역이나, 보유하신 가점/통장 조건으로 도전해 볼 만한 메리트 있는 공고입니다.");
+        }
     }
 
     if (isJupJup(item)) {
@@ -570,7 +620,7 @@ function calculateScore(item, condition) {
     }
 
     score = Math.max(0, Math.min(100, score));
-    return { score, reasons };
+    return { score, reasons, isMatchedRegion };
 }
 
 function getScoreGrade(score) {
@@ -648,15 +698,19 @@ function renderHeaderFavorites() {
 /* =========================================================
    FILTER & SORT
 ========================================================= */
-function applyFilter(data) {
+function applyFilter(data, condition) {
     const favorites = getFavorites();
     return data.filter(item => {
         const name = getAnnouncementName(item);
         const dday = calculateDDay(getEndDate(item));
+        const analysis = calculateScore(item, condition);
 
         if (showFavoritesOnly && !favorites[name]) return false;
         if (currentFilter === "urgent") return dday.urgent;
         if (currentFilter === "special") return isJupJup(item);
+        if (currentFilter === "recommend") {
+            return !analysis.isMatchedRegion && (analysis.score >= 65 || isJupJup(item));
+        }
         if (currentFilter === "favorite") return !!favorites[name];
         return true;
     });
@@ -714,6 +768,7 @@ function createCard(item, condition) {
                 <div class="min-w-0">
                     <div class="flex flex-wrap gap-1.5 mb-2">
                         ${isJupJup(item) ? `<span class="bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full text-[10px] font-bold">✨ 무순위</span>` : ""}
+                        ${!analysis.isMatchedRegion ? `<span class="bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full text-[10px] font-bold">💡 타지역 추천</span>` : ""}
                         <span class="bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full text-[10px] font-bold">${escapeHtml(housingType)}</span>
                         <span class="bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full text-[10px] font-bold">${escapeHtml(supplyType)}</span>
                     </div>
@@ -798,12 +853,10 @@ function createCard(item, condition) {
         </div>
     `;
 
-    // 찜하기 이벤트 바인딩
     card.querySelector('[data-favorite="true"]').addEventListener("click", () => {
         toggleFavorite(name, url);
     });
 
-    // 비동기로 모델(타입별 분양가/면적) 정보 가져와서 반영
     fetchModelDetails(houseManageNo).then(models => {
         const priceEl = card.querySelector(".price-field");
         const areaEl = card.querySelector(".area-field");
@@ -821,11 +874,9 @@ function createCard(item, condition) {
                 const maxPriceMan = Math.max(...prices);
                 priceEl.innerText = minPriceMan === maxPriceMan ? formatKoreanPrice(minPriceMan) : `${formatKoreanPrice(minPriceMan)} ~ ${formatKoreanPrice(maxPriceMan)}`;
                 
-                // 필요현금 (기본 계약금 10% 기준 원화 계산)
                 const minPriceWon = minPriceMan * 10000;
                 const contractCash = minPriceWon * 0.1;
                 
-                // 취등록세 추정 (6억 이하 ~1.1%, 9억 초과 ~3.3%)
                 let taxRate = 0.011;
                 if (minPriceWon >= 900000000) taxRate = 0.033;
                 else if (minPriceWon >= 600000000) taxRate = 0.022;
@@ -866,12 +917,18 @@ function getFilteredData() {
     let data = allData.filter(item => {
         const address = getAnnouncementAddress(item);
         const endDate = normalizeDate(getEndDate(item)) || "99999999";
-        const regionMatch = condition.region === "전체" || address.includes(condition.region);
+        
+        const regionMatch = condition.regions.includes("전체") || condition.regions.some(r => address.includes(r));
         const dateMatch = endDate >= TODAY;
+
+        if (currentFilter === "recommend") {
+            return dateMatch;
+        }
+
         return regionMatch && dateMatch;
     });
 
-    data = applyFilter(data);
+    data = applyFilter(data, condition);
     data = sortAnnouncements(data);
     return data;
 }
@@ -934,7 +991,7 @@ async function fetchData() {
 }
 
 /* =========================================================
-   이벤트 리스너 등록
+   이벤트 리스너 등록 (지역 체크박스 상호 배타적 연동)
 ========================================================= */
 document.getElementById("diagnosisBtn").addEventListener("click", render);
 document.getElementById("saveConditionBtn").addEventListener("click", saveCondition);
@@ -955,7 +1012,36 @@ document.querySelectorAll(".filter-btn").forEach(button => {
     });
 });
 
-["userRegion", "userNonHomeYears", "userSavingsYears", "userFamily", "userHousing"].forEach(id => {
+// 지역 체크박스 상호 배타적 제어 로직
+document.querySelectorAll(".region-chk").forEach(cb => {
+    cb.addEventListener("change", function () {
+        const allCheckbox = document.querySelector('.region-chk[value="전체"]');
+        
+        if (this.value === "전체") {
+            if (this.checked) {
+                // "전체"를 누르면 다른 지역들을 모두 해제
+                document.querySelectorAll(".region-chk").forEach(other => {
+                    if (other.value !== "전체") other.checked = false;
+                });
+            }
+        } else {
+            if (this.checked) {
+                // 다른 특정 지역을 누르면 "전체" 체크를 해제
+                if (allCheckbox) allCheckbox.checked = false;
+            }
+        }
+
+        // 아무것도 체크되지 않았다면 다시 "전체"를 강제로 체크
+        const checkedCount = document.querySelectorAll(".region-chk:checked").length;
+        if (checkedCount === 0 && allCheckbox) {
+            allCheckbox.checked = true;
+        }
+
+        updateConditionSummary();
+    });
+});
+
+["userNonHomeYears", "userSavingsYears", "userFamily", "userHousing"].forEach(id => {
     document.getElementById(id).addEventListener("input", updateConditionSummary);
     document.getElementById(id).addEventListener("change", updateConditionSummary);
 });
