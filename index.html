@@ -53,6 +53,18 @@
         .data-value {
             word-break: keep-all;
         }
+        .skeleton {
+            background: linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.4s infinite;
+            border-radius: 4px;
+            display: inline-block;
+            min-width: 48px;
+        }
+        @keyframes shimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
     </style>
 </head>
 
@@ -277,11 +289,35 @@
 
 <script>
 /* =========================================================
-   API
+   API 설정
+
+   ⚠️ 중요: 공공데이터포털 서비스키를 프론트엔드 코드에 그대로
+   노출하면 누구나 페이지 소스에서 키를 복사해 쓸 수 있습니다.
+   가능하면 아래 두 가지 중 하나로 전환하세요.
+
+   1) 서버리스 함수(예: Vercel/Netlify Functions, Cloudflare
+      Workers)를 하나 만들어 실제 서비스키는 그 함수 환경변수에만
+      두고, 프론트에서는 그 함수의 주소(BASE_PATH)만 호출합니다.
+   2) 최소한 이 키는 재발급(rotate) 받아서, 지금까지 노출된 키는
+      더 이상 유효하지 않게 만드세요.
+
+   아래 USE_PROXY를 true로 바꾸고 PROXY_BASE를 본인의 프록시
+   엔드포인트로 지정하면, 이 파일에는 더 이상 서비스키가 남지
+   않습니다. (프록시 쪽에서 위 API_URL/MODEL_API_URL 요청을
+   그대로 중계하며 serviceKey만 서버에서 붙여주면 됩니다.)
 ========================================================= */
-const API_KEY = "73d2e59ef152e8b86188255ac343a5d161f4327d8aa00f0daa8a94c86681589f";
-const API_URL = "https://api.odcloud.kr/api/ApplyhomeInfoDetailSvc/v1/getAPTLttotPblancDetail?serviceKey=" + encodeURIComponent(API_KEY) + "&page=1&perPage=100";
-const MODEL_API_URL = "https://api.odcloud.kr/api/ApplyhomeInfoDetailSvc/v1/getAPTLttotPblancMdl?serviceKey=" + encodeURIComponent(API_KEY) + "&page=1&perPage=50&cond[HOUSE_MANAGE_NO::EQ]=";
+const USE_PROXY = false; // 프록시를 준비했다면 true로 변경
+const PROXY_BASE = "https://your-proxy.example.com/api"; // 본인 프록시 주소로 교체
+
+const API_KEY = "73d2e59ef152e8b86188255ac343a5d161f4327d8aa00f0daa8a94c86681589f"; // TODO: 재발급 후 교체 권장
+
+const API_URL = USE_PROXY
+    ? `${PROXY_BASE}/getAPTLttotPblancDetail?page=1&perPage=100`
+    : "https://api.odcloud.kr/api/ApplyhomeInfoDetailSvc/v1/getAPTLttotPblancDetail?serviceKey=" + encodeURIComponent(API_KEY) + "&page=1&perPage=100";
+
+const MODEL_API_BASE = USE_PROXY
+    ? `${PROXY_BASE}/getAPTLttotPblancMdl?page=1&perPage=50&cond[HOUSE_MANAGE_NO::EQ]=`
+    : "https://api.odcloud.kr/api/ApplyhomeInfoDetailSvc/v1/getAPTLttotPblancMdl?serviceKey=" + encodeURIComponent(API_KEY) + "&page=1&perPage=50&cond[HOUSE_MANAGE_NO::EQ]=";
 
 /* =========================================================
    전역
@@ -290,6 +326,38 @@ let allData = [];
 let currentFilter = "all";
 let showFavoritesOnly = false;
 const modelCache = {};
+
+/* =========================================================
+   동시 요청 제한 큐
+   (모델 상세 API를 카드 수만큼 한꺼번에 쏘면 공공데이터 API가
+   429/타임아웃을 반환할 수 있어, 최대 동시 실행 개수를 제한합니다.)
+========================================================= */
+function createRequestQueue(concurrency) {
+    let active = 0;
+    const queue = [];
+
+    function runNext() {
+        if (active >= concurrency || queue.length === 0) return;
+        active++;
+        const { task, resolve, reject } = queue.shift();
+        task()
+            .then(resolve)
+            .catch(reject)
+            .finally(() => {
+                active--;
+                runNext();
+            });
+    }
+
+    return function enqueue(task) {
+        return new Promise((resolve, reject) => {
+            queue.push({ task, resolve, reject });
+            runNext();
+        });
+    };
+}
+
+const enqueueModelFetch = createRequestQueue(4);
 
 /* =========================================================
    날짜
@@ -379,23 +447,31 @@ function getHouseManageNo(item) {
 }
 
 /* =========================================================
-   모델 API를 통한 분양가 및 면적 조회
+   모델 API를 통한 분양가 및 면적 조회 (동시 요청 제한 큐 사용)
 ========================================================= */
 async function fetchModelDetails(houseManageNo) {
     if (!houseManageNo) return [];
     if (modelCache[houseManageNo]) return modelCache[houseManageNo];
 
-    try {
-        const response = await fetch(MODEL_API_URL + houseManageNo);
-        if (!response.ok) return [];
-        const json = await response.json();
-        const data = Array.isArray(json.data) ? json.data : [];
-        modelCache[houseManageNo] = data;
-        return data;
-    } catch (e) {
-        console.error("주택형별 상세 API 호출 실패:", e);
-        return [];
-    }
+    return enqueueModelFetch(async () => {
+        // 큐에서 대기하는 동안 다른 요청이 먼저 캐시를 채웠을 수 있으므로 재확인
+        if (modelCache[houseManageNo]) return modelCache[houseManageNo];
+
+        try {
+            const response = await fetch(MODEL_API_BASE + houseManageNo);
+            if (!response.ok) {
+                console.warn(`모델 API 응답 오류 (${houseManageNo}):`, response.status);
+                return [];
+            }
+            const json = await response.json();
+            const data = Array.isArray(json.data) ? json.data : [];
+            modelCache[houseManageNo] = data;
+            return data;
+        } catch (e) {
+            console.error("주택형별 상세 API 호출 실패:", e);
+            return [];
+        }
+    });
 }
 
 function formatKoreanPrice(value) {
@@ -796,11 +872,11 @@ function createCard(item, condition) {
             <div class="bg-gray-50 border border-gray-100 p-3 rounded-xl grid grid-cols-2 gap-y-3 gap-x-4 text-[11px]">
                 <div>
                     <span class="text-gray-400 font-medium">분양가</span>
-                    <div class="font-bold text-gray-800 mt-0.5 price-field data-value">조회 중...</div>
+                    <div class="font-bold text-gray-800 mt-0.5 price-field data-value"><span class="skeleton">&nbsp;</span></div>
                 </div>
                 <div>
                     <span class="text-gray-400 font-medium">전용면적</span>
-                    <div class="font-bold text-gray-800 mt-0.5 area-field data-value">조회 중...</div>
+                    <div class="font-bold text-gray-800 mt-0.5 area-field data-value"><span class="skeleton">&nbsp;</span></div>
                 </div>
                 <div>
                     <span class="text-gray-400 font-medium">공급세대</span>
@@ -819,15 +895,19 @@ function createCard(item, condition) {
                         <span>필요현금 (계약금)</span>
                         <div class="group relative cursor-pointer inline-block">
                             <span class="bg-blue-100 text-blue-700 text-[10px] font-bold px-1.5 py-0.5 rounded-full hover:bg-blue-200 transition">+ 세금 예상</span>
-                            <div class="absolute bottom-full right-0 mb-2 hidden group-hover:block w-52 bg-gray-900 text-white text-[10px] p-2.5 rounded-lg shadow-xl z-50 whitespace-normal">
+                            <div class="absolute bottom-full right-0 mb-2 hidden group-hover:block w-56 bg-gray-900 text-white text-[10px] p-2.5 rounded-lg shadow-xl z-50 whitespace-normal">
                                 <p class="font-bold text-yellow-300 mb-1">💰 초기 필요현금 & 세금 예상</p>
                                 <p class="contract-detail text-gray-200">계약금(10%): 계산 중...</p>
                                 <p class="tax-detail text-gray-200">취등록세 등(약1.1~3.3%): 계산 중...</p>
                                 <p class="total-detail text-white font-bold mt-1 pt-1 border-t border-gray-700">총 초기 예상: 계산 중...</p>
+                                <p class="text-gray-400 mt-1.5 pt-1.5 border-t border-gray-700 leading-snug">
+                                    ※ 최저 분양가 기준 단순 추정치이며, 생애최초·다자녀 등 감면 및 지자체별 조례는
+                                    반영되지 않았습니다. 정확한 금액은 공고문과 세무 상담을 통해 확인하세요.
+                                </p>
                             </div>
                         </div>
                     </span>
-                    <div class="font-bold text-blue-600 mt-0.5 cash-field">조회 중...</div>
+                    <div class="font-bold text-blue-600 mt-0.5 cash-field"><span class="skeleton">&nbsp;</span></div>
                 </div>
                 <div>
                     <span class="text-gray-400 font-medium">전매제한</span>
@@ -875,19 +955,19 @@ function createCard(item, condition) {
                 const minPriceMan = Math.min(...prices);
                 const maxPriceMan = Math.max(...prices);
                 priceEl.innerText = minPriceMan === maxPriceMan ? formatKoreanPrice(minPriceMan) : `${formatKoreanPrice(minPriceMan)} ~ ${formatKoreanPrice(maxPriceMan)}`;
-                
+
                 const minPriceWon = minPriceMan * 10000;
                 const contractCash = minPriceWon * 0.1;
-                
+
                 let taxRate = 0.011;
                 if (minPriceWon >= 900000000) taxRate = 0.033;
                 else if (minPriceWon >= 600000000) taxRate = 0.022;
-                
+
                 const estimatedTax = minPriceWon * taxRate;
                 const totalNeeded = contractCash + estimatedTax;
 
                 cashEl.innerText = formatWonToDisplay(contractCash);
-                
+
                 if (contractDetail) contractDetail.innerText = `계약금(10%): ${formatWonToDisplay(contractCash)}`;
                 if (taxDetail) taxDetail.innerText = `예상 세금(~${(taxRate*100).toFixed(1)}%): ${formatWonToDisplay(estimatedTax)}`;
                 if (totalDetail) totalDetail.innerText = `총 초기 예상: ${formatWonToDisplay(totalNeeded)}`;
@@ -906,6 +986,13 @@ function createCard(item, condition) {
             priceEl.innerText = "공고문 참조";
             areaEl.innerText = "공고문 참조";
         }
+    }).catch(() => {
+        const priceEl = card.querySelector(".price-field");
+        const areaEl = card.querySelector(".area-field");
+        const cashEl = card.querySelector(".cash-field");
+        if (priceEl) priceEl.innerText = "조회 실패";
+        if (areaEl) areaEl.innerText = "조회 실패";
+        if (cashEl) cashEl.innerText = "조회 실패";
     });
 
     return card;
@@ -919,7 +1006,7 @@ function getFilteredData() {
     let data = allData.filter(item => {
         const address = getAnnouncementAddress(item);
         const endDate = normalizeDate(getEndDate(item)) || "99999999";
-        
+
         const regionMatch = condition.regions.includes("전체") || condition.regions.some(r => address.includes(r));
         const dateMatch = endDate >= TODAY;
 
@@ -1018,7 +1105,7 @@ document.querySelectorAll(".filter-btn").forEach(button => {
 document.querySelectorAll(".region-chk").forEach(cb => {
     cb.addEventListener("change", function () {
         const allCheckbox = document.querySelector('.region-chk[value="전체"]');
-        
+
         if (this.value === "전체") {
             if (this.checked) {
                 // "전체"를 누르면 다른 지역들을 모두 해제
