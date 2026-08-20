@@ -2,37 +2,129 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI 무료 청약 컨설팅</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans KR", sans-serif;
+        }
+        .card-hover {
+            transition: all 0.2s ease;
+        }
+        .card-hover:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+        }
+        .favorite-btn {
+            transition: transform 0.15s ease;
+        }
+        .favorite-btn:active {
+            transform: scale(1.25);
+        }
+        .recommend-box {
+            background: linear-gradient(135deg, #eff6ff, #f5f3ff);
+        }
+        .urgent {
+            animation: pulseBorder 1.8s infinite;
+        }
+        @keyframes pulseBorder {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.15); }
+            50% { box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.08); }
+        }
+        .filter-btn {
+            font-size: 11px;
+            font-weight: 600;
+            padding: 6px 10px;
+            border-radius: 8px;
+            background: #f3f4f6;
+            color: #6b7280;
+            transition: all 0.15s ease;
+        }
+        .filter-btn:hover {
+            background: #e5e7eb;
+        }
+        .filter-btn.active {
+            background: #2563eb;
+            color: white;
+        }
+        .data-value {
+            word-break: keep-all;
+        }
+    </style>
 </head>
-<body class="bg-gray-100 min-h-screen flex flex-col justify-between p-4 md:p-8">
-    <div class="max-w-5xl mx-auto space-y-6 w-full">
-        
-        <!-- Header -->
-        <header class="bg-gradient-to-r from-blue-600 to-indigo-700 text-white p-6 rounded-2xl shadow-lg flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-            <div class="space-y-1">
-                <span class="bg-yellow-400 text-blue-950 text-[10px] font-extrabold px-2 py-0.5 rounded-full uppercase tracking-wider">100% 무료 AI 컨설팅</span>
-                <h1 class="text-2xl font-bold mt-1">💡 내집마련 AI 청약 컨설턴트</h1>
-                <p class="text-blue-100 text-sm">조건만 입력하시면, 내 자격에 딱 맞는 최적의 청약 공고를 무료로 분석해 드립니다.</p>
-            </div>
-            
-            <!-- 우측 여백 즐겨찾기 요약 박스 -->
-            <div class="bg-blue-900/50 border border-blue-400/30 p-3.5 rounded-xl w-full md:w-80 shadow-inner">
-                <div class="flex items-center justify-between mb-2">
-                    <span class="text-xs font-bold text-yellow-300 flex items-center gap-1">⭐ 찜한 청약 바로가기</span>
-                    <span id="favCount" class="text-[10px] bg-blue-800 px-2 py-0.5 rounded-full text-blue-200">0개</span>
-                </div>
-                <div id="headerFavList" class="space-y-1.5 max-h-28 overflow-y-auto text-xs">
-                    <p class="text-blue-200 text-[11px] italic">등록된 관심 단지가 없습니다.</p>
-                </div>
-            </div>
-        </header>
 
-        <!-- 자격 진단 섹션 -->
-        <section class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-            <div class="grid grid-cols-2 md:grid-cols-6 gap-4">
-                <select id="userRegion" class="border p-2 rounded text-sm bg-white">
-                    <option value="전체">전국 (전체)</option>
+<body class="bg-gray-100 min-h-screen flex flex-col p-4 md:p-8">
+
+<div class="max-w-6xl mx-auto w-full space-y-6">
+
+    <!-- =========================================================
+         HEADER
+    ========================================================== -->
+    <header class="bg-gradient-to-r from-blue-600 to-indigo-700 text-white p-6 rounded-2xl shadow-lg flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
+        <div class="space-y-2">
+            <div>
+                <span class="bg-yellow-400 text-blue-950 text-[10px] font-extrabold px-2 py-1 rounded-full">
+                    100% 무료 AI 컨설팅
+                </span>
+            </div>
+            <h1 class="text-2xl md:text-3xl font-bold">
+                💡 내집마련 AI 청약 컨설턴트
+            </h1>
+            <p class="text-blue-100 text-sm">
+                내 청약 조건을 분석하여 현재 접수 가능한 공고를 맞춤 추천합니다.
+            </p>
+            <div class="text-[11px] text-blue-200">
+                오늘 기준: <span id="todayText" class="font-bold text-white"></span>
+            </div>
+        </div>
+
+        <!-- 즐겨찾기 -->
+        <div class="bg-blue-900/50 border border-blue-400/30 p-4 rounded-xl w-full lg:w-96 shadow-inner">
+            <div class="flex items-center justify-between mb-3">
+                <span class="text-xs font-bold text-yellow-300 flex items-center gap-1">
+                    ⭐ 찜한 청약
+                </span>
+                <div class="flex items-center gap-2">
+                    <span id="favCount" class="text-[10px] bg-blue-800 px-2 py-0.5 rounded-full text-blue-200">0개</span>
+                    <button id="showFavoritesBtn" type="button" class="text-[10px] bg-white/10 hover:bg-white/20 px-2 py-1 rounded transition">
+                        관심공고만 보기
+                    </button>
+                </div>
+            </div>
+            <div id="headerFavList" class="space-y-1.5 max-h-36 overflow-y-auto text-xs"></div>
+        </div>
+    </header>
+
+    <!-- =========================================================
+         사용자 조건
+    ========================================================== -->
+    <section class="bg-white p-5 md:p-6 rounded-2xl shadow-sm border border-gray-100">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-5">
+            <div>
+                <h2 class="font-bold text-gray-900">
+                    🎯 나의 청약 조건
+                </h2>
+                <p class="text-xs text-gray-500 mt-1">
+                    조건을 입력하면 공고별 청약 적합도를 자동 계산합니다.
+                </p>
+            </div>
+            <div class="flex gap-2">
+                <button id="saveConditionBtn" type="button" class="text-xs border border-gray-200 px-3 py-2 rounded-lg hover:bg-gray-50 transition">
+                    💾 조건 저장
+                </button>
+                <button id="resetConditionBtn" type="button" class="text-xs border border-gray-200 px-3 py-2 rounded-lg hover:bg-gray-50 transition">
+                    초기화
+                </button>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+            <!-- 지역 -->
+            <div>
+                <label for="userRegion" class="block text-[11px] font-bold text-gray-500 mb-1">희망 지역</label>
+                <select id="userRegion" class="w-full border border-gray-200 p-2.5 rounded-lg text-sm bg-white focus:ring-2 focus:ring-blue-200 outline-none">
+                    <option value="전체">전국 전체</option>
                     <option value="서울">서울특별시</option>
                     <option value="경기">경기도</option>
                     <option value="인천">인천광역시</option>
@@ -51,171 +143,831 @@
                     <option value="경남">경상남도</option>
                     <option value="제주">제주특별자치도</option>
                 </select>
-                <input type="number" id="userNonHomeYears" placeholder="무주택(년)" class="border p-2 rounded text-sm">
-                <input type="number" id="userSavingsYears" placeholder="통장가입(년)" class="border p-2 rounded text-sm">
-                <input type="number" id="userFamily" placeholder="부양가족(명)" class="border p-2 rounded text-sm">
-                <select id="userHousing" class="border p-2 rounded text-sm bg-white"><option value="none">무주택</option><option value="has">유주택</option></select>
-                <button onclick="render()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold rounded text-sm py-2 transition">맞춤 진단 시작</button>
             </div>
-        </section>
 
-        <!-- 리스트 영역 -->
-        <div id="listContainer" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div class="col-span-full bg-white p-10 rounded-2xl text-center text-gray-500 shadow-sm border text-sm">데이터를 불러오는 중입니다...</div>
+            <!-- 무주택 기간 -->
+            <div>
+                <label for="userNonHomeYears" class="block text-[11px] font-bold text-gray-500 mb-1">무주택 기간</label>
+                <div class="relative">
+                    <input type="number" id="userNonHomeYears" min="0" max="50" placeholder="예: 8" class="w-full border border-gray-200 p-2.5 pr-10 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-200">
+                    <span class="absolute right-3 top-2.5 text-xs text-gray-400">년</span>
+                </div>
+            </div>
+
+            <!-- 청약통장 -->
+            <div>
+                <label for="userSavingsYears" class="block text-[11px] font-bold text-gray-500 mb-1">청약통장 가입기간</label>
+                <div class="relative">
+                    <input type="number" id="userSavingsYears" min="0" max="50" placeholder="예: 10" class="w-full border border-gray-200 p-2.5 pr-10 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-200">
+                    <span class="absolute right-3 top-2.5 text-xs text-gray-400">년</span>
+                </div>
+            </div>
+
+            <!-- 부양가족 -->
+            <div>
+                <label for="userFamily" class="block text-[11px] font-bold text-gray-500 mb-1">부양가족</label>
+                <div class="relative">
+                    <input type="number" id="userFamily" min="0" max="20" placeholder="예: 2" class="w-full border border-gray-200 p-2.5 pr-12 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-200">
+                    <span class="absolute right-3 top-2.5 text-xs text-gray-400">명</span>
+                </div>
+            </div>
+
+            <!-- 주택 -->
+            <div>
+                <label for="userHousing" class="block text-[11px] font-bold text-gray-500 mb-1">현재 주택 보유</label>
+                <select id="userHousing" class="w-full border border-gray-200 p-2.5 rounded-lg text-sm bg-white focus:ring-2 focus:ring-blue-200 outline-none">
+                    <option value="none">무주택</option>
+                    <option value="has">유주택</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="mt-4 flex flex-col md:flex-row justify-between gap-3">
+            <div id="conditionSummary" class="text-xs text-gray-500"></div>
+            <button id="diagnosisBtn" type="button" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-2.5 rounded-xl text-sm transition shadow-sm">
+                🔍 맞춤 진단 시작
+            </button>
+        </div>
+    </section>
+
+    <!-- =========================================================
+         필터
+    ========================================================== -->
+    <section class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
+            <div>
+                <span class="text-xs text-gray-500">검색 결과</span>
+                <strong id="resultCount" class="text-sm ml-1">0개</strong>
+            </div>
+            <div class="flex flex-wrap gap-2">
+                <button type="button" class="filter-btn active" data-filter="all">전체</button>
+                <button type="button" class="filter-btn" data-filter="urgent">🔴 마감임박</button>
+                <button type="button" class="filter-btn" data-filter="special">✨ 무순위</button>
+                <button type="button" class="filter-btn" data-filter="favorite">⭐ 관심공고</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- =========================================================
+         LIST
+    ========================================================== -->
+    <div id="listContainer" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="col-span-full bg-white p-10 rounded-2xl text-center text-gray-500 shadow-sm border">
+            <div class="text-3xl mb-2">⏳</div>
+            데이터를 불러오는 중입니다...
         </div>
     </div>
 
-    <!-- 💡 개발자 정보 및 요구사항 접수용 Footer -->
-    <footer class="max-w-5xl mx-auto w-full mt-12 border-t border-gray-200 pt-6 pb-4 text-center text-xs text-gray-500 space-y-2">
-        <p class="font-semibold text-gray-700">💡 AI 무료 청약 컨설팅 오픈소스 프로젝트</p>
-        <p>
-            기능 개선 요청이나 추가적인 요구사항은 아래 메일로 보내주시면 적극 반영하겠습니다.
-        </p>
-        <p>
-            <a href="mailto:wjdrms5815@gmail.com" class="text-blue-600 font-bold hover:underline">📧 wjdrms5815@gmail.com</a>
-        </p>
-        <p class="text-[11px] text-gray-400 pt-2">
-            Developer: Jeong Geun Yuk &nbsp;|&nbsp; prod jg_6
-        </p>
-    </footer>
+</div>
 
-    <script>
-        const API_KEY = "73d2e59ef152e8b86188255ac343a5d161f4327d8aa00f0daa8a94c86681589f";
-        const URL = `https://api.odcloud.kr/api/ApplyhomeInfoDetailSvc/v1/getAPTLttotPblancDetail?serviceKey=${API_KEY}&page=1&perPage=50`;
-        const TODAY = "20260819";
+<!-- =========================================================
+    FOOTER
+========================================================== -->
+<footer class="max-w-6xl mx-auto w-full mt-12 border-t border-gray-200 pt-6 pb-4 text-center text-xs text-gray-500 space-y-2">
+    <p class="font-semibold text-gray-700">💡 AI 무료 청약 컨설팅 오픈소스 프로젝트</p>
+    <p>기능 개선 요청이나 추가적인 요구사항은 아래 메일로 보내주시면 적극 반영하겠습니다.</p>
+    <p>
+        <a href="mailto:wjdrms5815@gmail.com" class="text-blue-600 font-bold hover:underline">
+            📧 wjdrms5815@gmail.com
+        </a>
+    </p>
+    <p class="text-[11px] text-gray-400 pt-2">
+        Developer: Jeong Geun Yuk &nbsp;|&nbsp; prod jg_6
+    </p>
+</footer>
 
-        let allData = [];
+<script>
+/* =========================================================
+   API
+========================================================= */
+const API_KEY = "73d2e59ef152e8b86188255ac343a5d161f4327d8aa00f0daa8a94c86681589f";
 
-        async function fetchData() {
-            try {
-                const res = await fetch(URL);
-                const json = await res.json();
-                allData = json.data || [];
-                render();
-            } catch (e) {
-                console.error(e);
-            }
+const API_URL = "https://api.odcloud.kr/api/ApplyhomeInfoDetailSvc/v1/getAPTLttotPblancDetail?serviceKey=" + encodeURIComponent(API_KEY) + "&page=1&perPage=100";
+
+const MODEL_API_URL = "https://api.odcloud.kr/api/ApplyhomeInfoDetailSvc/v1/getAPTLttotPblancMdl?serviceKey=" + encodeURIComponent(API_KEY) + "&page=1&perPage=50&cond[HOUSE_MANAGE_NO::EQ]=";
+
+/* =========================================================
+   전역
+========================================================= */
+let allData = [];
+let currentFilter = "all";
+let showFavoritesOnly = false;
+const modelCache = {};
+
+/* =========================================================
+   날짜
+========================================================= */
+function getTodayString() {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, "0");
+    const day = String(now.getDate()).padStart(2, "0");
+    return year + month + day;
+}
+
+const TODAY = getTodayString();
+
+function normalizeDate(value) {
+    if (value === null || value === undefined) return "";
+    return String(value).replace(/[^0-9]/g, "").substring(0, 8);
+}
+
+function formatDate(value) {
+    const date = normalizeDate(value);
+    if (date.length !== 8) return value || "-";
+    return date.substring(0, 4) + "." + date.substring(4, 6) + "." + date.substring(6, 8);
+}
+
+function calculateDDay(endDate) {
+    const normalized = normalizeDate(endDate);
+    if (normalized.length !== 8) {
+        return { text: "마감일 미정", days: 999, urgent: false };
+    }
+    const end = new Date(normalized.substring(0, 4) + "-" + normalized.substring(4, 6) + "-" + normalized.substring(6, 8));
+    const today = new Date(TODAY.substring(0, 4) + "-" + TODAY.substring(4, 6) + "-" + TODAY.substring(6, 8));
+    const diff = Math.ceil((end.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+
+    if (diff < 0) return { text: "마감", days: diff, urgent: false };
+    if (diff === 0) return { text: "오늘 마감", days: 0, urgent: true };
+    return { text: `D-${diff}`, days: diff, urgent: diff <= 3 };
+}
+
+/* =========================================================
+   HTML ESCAPE
+========================================================= */
+function escapeHtml(value) {
+    if (value === null || value === undefined) return "";
+    return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
+/* =========================================================
+   데이터 필드 탐색
+========================================================= */
+function getFirstValue(item, fields) {
+    for (const field of fields) {
+        if (item[field] !== undefined && item[field] !== null && String(item[field]).trim() !== "") {
+            return item[field];
         }
+    }
+    return "";
+}
 
-        function toggleFavorite(name, url) {
-            let favorites = JSON.parse(localStorage.getItem('favList') || '{}');
-            if (favorites[name]) {
-                delete favorites[name];
-            } else {
-                favorites[name] = url;
-            }
-            localStorage.setItem('favList', JSON.stringify(favorites));
-            render();
+function getAnnouncementName(item) {
+    return getFirstValue(item, ["HOUSE_NM", "houseNm", "HOUSE_NM_NM", "houseNmNm", "PBLANC_NM", "pblancNm"]) || "정보없음";
+}
+
+function getAnnouncementAddress(item) {
+    return getFirstValue(item, ["HSSPLY_ADRES", "hssplyAdres", "HSSPLY_ADRES_DETAIL", "hssplyAdresDetail", "SUBWAY_LINE"]) || "주소 정보 없음";
+}
+
+function getAnnouncementUrl(item) {
+    return getFirstValue(item, ["PBLANC_URL", "pblancUrl", "PBLANCURL", "pblancurl"]) || "https://www.applyhome.co.kr";
+}
+
+function getStartDate(item) {
+    return getFirstValue(item, ["RCEPT_BGNDE", "rceptBgnde", "RCEPT_BGNGDE", "rceptBgngde", "SUBSCRPT_RCEPT_BGNDE", "subscrptRceptBgnde"]);
+}
+
+function getEndDate(item) {
+    return getFirstValue(item, ["RCEPT_ENDDE", "rceptEndde", "subscrptRceptEndde", "SUBSCRPT_RCEPT_ENDDE"]);
+}
+
+function getHouseManageNo(item) {
+    return getFirstValue(item, ["HOUSE_MANAGE_NO", "houseManageNo"]);
+}
+
+/* =========================================================
+   모델 API를 통한 분양가 포맷터 (만원 단위를 억/천만 원 단위로 변환)
+========================================================= */
+async function fetchModelDetails(houseManageNo) {
+    if (!houseManageNo) return [];
+    if (modelCache[houseManageNo]) return modelCache[houseManageNo];
+
+    try {
+        const response = await fetch(MODEL_API_URL + houseManageNo);
+        if (!response.ok) return [];
+        const json = await response.json();
+        const data = Array.isArray(json.data) ? json.data : [];
+        modelCache[houseManageNo] = data;
+        return data;
+    } catch (e) {
+        console.error("주택형별 상세 API 호출 실패:", e);
+        return [];
+    }
+}
+
+function formatKoreanPrice(value) {
+    if (value === null || value === undefined || value === "") return "공고문 참조";
+    const raw = String(value).replace(/[^0-9.-]/g, "");
+    const num = Number(raw);
+    if (!Number.isFinite(num) || num === 0) return String(value);
+
+    // API 분양가 데이터(만원 단위 가정) -> 실제 원화 환산
+    const uk = Math.floor(num / 10000);
+    const remainder = num % 10000;
+
+    if (uk > 0) {
+        const chun = Math.floor(remainder / 1000);
+        if (chun > 0) {
+            return `${uk}억 ${chun}천만원`;
+        } else if (remainder > 0) {
+            return `${uk}억 ${remainder.toLocaleString()}만원`;
+        } else {
+            return `${uk}억 원`;
         }
+    } else {
+        return `${num.toLocaleString()}만원`;
+    }
+}
 
-        function renderHeaderFavorites() {
-            const favContainer = document.getElementById('headerFavList');
-            const favCountBadge = document.getElementById('favCount');
-            let favorites = JSON.parse(localStorage.getItem('favList') || '{}');
-            const keys = Object.keys(favorites);
+function formatWonToDisplay(won) {
+    if (!won || won === 0) return "공고문 확인";
+    const man = Math.floor(won / 10000);
+    const uk = Math.floor(man / 10000);
+    const rem = man % 10000;
+    if (uk > 0) {
+        const chun = Math.floor(rem / 1000);
+        if (chun > 0) return `약 ${uk}억 ${chun}천만원`;
+        return `약 ${uk}억 ${rem > 0 ? rem.toLocaleString() + '만원' : ''}`;
+    } else {
+        return `약 ${man.toLocaleString()}만원`;
+    }
+}
 
-            favCountBadge.innerText = `${keys.length}개`;
+/* =========================================================
+   공급 세대수 및 메타데이터
+========================================================= */
+function getSupplyCount(item) {
+    const value = getFirstValue(item, ["TOT_SUPLY_HSHLDCO", "totSuplyHshldco", "TOT_SUPLY_HSHLD_CO", "totSuplyHshldCo", "SUPLY_HSHLDCO", "suplyHshldco"]);
+    if (!value) return "공고문 참조";
+    return Number(value).toLocaleString("ko-KR") + "세대";
+}
 
-            if (keys.length === 0) {
-                favContainer.innerHTML = `<p class="text-blue-200 text-[11px] italic">등록된 관심 단지가 없습니다.</p>`;
-                return;
-            }
+function getHousingType(item) {
+    const name = getAnnouncementName(item);
+    const type = getFirstValue(item, ["HOUSE_DTL_SECD_NM", "houseDtlSecdNm", "HOUSE_SECD_NM", "houseSecdNm"]);
+    if (type) return String(type);
+    if (/무순위|잔여세대|임의공급|취소후재공급/i.test(name)) return "무순위";
+    if (/국민주택/i.test(name)) return "국민주택";
+    if (/공공분양/i.test(name)) return "공공분양";
+    if (/특별공급/i.test(name)) return "특별공급";
+    return "민영주택";
+}
 
-            favContainer.innerHTML = "";
-            keys.forEach(name => {
-                const url = favorites[name];
-                favContainer.innerHTML += `
-                    <div class="flex items-center justify-between bg-blue-800/40 px-2 py-1 rounded">
-                        <span class="truncate pr-2 font-medium text-white">${name}</span>
-                        <a href="${url}" target="_blank" class="bg-yellow-400 hover:bg-yellow-500 text-blue-950 font-bold px-2 py-0.5 rounded text-[10px] whitespace-nowrap transition">바로가기</a>
+function getSupplyType(item) {
+    const value = getFirstValue(item, ["HOUSE_DTL_SECD_NM", "houseDtlSecdNm", "SUPLY_TY_NM", "suplyTyNm"]);
+    if (value) return String(value);
+    const name = getAnnouncementName(item);
+    if (/무순위/i.test(name)) return "무순위";
+    if (/특별공급/i.test(name)) return "특별공급";
+    return "일반공급";
+}
+
+function getEligibility(item, condition) {
+    const apiValue = getFirstValue(item, ["QUALIFICATION", "qualification", "SUBSCRPT_QUAL"]);
+    if (apiValue) return String(apiValue);
+    if (getHousingType(item) === "무순위") return "공고별 자격 확인";
+    if (condition.housing === "none") return "무주택 기준";
+    return "공고문 확인";
+}
+
+function getContractRate(item) {
+    const value = getFirstValue(item, ["CONTRACT_RATE", "contractRate", "CNTRCT_RATE", "cntrctRate"]);
+    if (!value) return null;
+    return String(value).includes("%") ? String(value) : String(value) + "%";
+}
+
+function getResaleRestriction(item) {
+    const value = getFirstValue(item, ["RESALE_RESTRICTION", "resaleRestriction", "RESALE_LIMIT", "resaleLimit"]);
+    return value ? String(value) : "공고문 확인";
+}
+
+function getResidenceObligation(item) {
+    const value = getFirstValue(item, ["RESIDENCE_OBLIGATION", "residenceObligation", "RESIDENCE_PERIOD", "residencePeriod"]);
+    return value ? String(value) : "공고문 확인";
+}
+
+function isJupJup(item) {
+    const name = getAnnouncementName(item);
+    return /무순위|잔여세대|임의공급|취소후재공급/i.test(name);
+}
+
+/* =========================================================
+   사용자 조건 관리
+========================================================= */
+function getUserCondition() {
+    return {
+        region: document.getElementById("userRegion").value,
+        nonHomeYears: Number(document.getElementById("userNonHomeYears").value) || 0,
+        savingsYears: Number(document.getElementById("userSavingsYears").value) || 0,
+        family: Number(document.getElementById("userFamily").value) || 0,
+        housing: document.getElementById("userHousing").value
+    };
+}
+
+function updateConditionSummary() {
+    const condition = getUserCondition();
+    const housingText = condition.housing === "none" ? "무주택" : "유주택";
+    document.getElementById("conditionSummary").innerHTML = `
+        현재 조건: <strong class="text-gray-700">${escapeHtml(condition.region)}</strong>
+        · ${condition.nonHomeYears}년 무주택
+        · 통장 ${condition.savingsYears}년
+        · 부양가족 ${condition.family}명
+        · ${housingText}
+    `;
+}
+
+function saveCondition() {
+    const condition = getUserCondition();
+    localStorage.setItem("mySubscriptionCondition", JSON.stringify(condition));
+    updateConditionSummary();
+    alert("청약 조건이 저장되었습니다.");
+}
+
+function loadCondition() {
+    const saved = localStorage.getItem("mySubscriptionCondition");
+    if (!saved) {
+        updateConditionSummary();
+        return;
+    }
+    try {
+        const condition = JSON.parse(saved);
+        document.getElementById("userRegion").value = condition.region || "전체";
+        document.getElementById("userNonHomeYears").value = condition.nonHomeYears || "";
+        document.getElementById("userSavingsYears").value = condition.savingsYears || "";
+        document.getElementById("userFamily").value = condition.family || "";
+        document.getElementById("userHousing").value = condition.housing || "none";
+    } catch (e) {
+        console.error("조건 복원 실패", e);
+    }
+    updateConditionSummary();
+}
+
+function resetCondition() {
+    document.getElementById("userRegion").value = "전체";
+    document.getElementById("userNonHomeYears").value = "";
+    document.getElementById("userSavingsYears").value = "";
+    document.getElementById("userFamily").value = "";
+    document.getElementById("userHousing").value = "none";
+    localStorage.removeItem("mySubscriptionCondition");
+    updateConditionSummary();
+    render();
+}
+
+/* =========================================================
+   AI 점수 및 등급
+========================================================= */
+function calculateScore(item, condition) {
+    let score = 50;
+    const reasons = [];
+
+    if (condition.housing === "none") {
+        score += 15;
+        reasons.push("현재 무주택 상태입니다.");
+    } else {
+        score -= 15;
+        reasons.push("유주택 상태이므로 공고별 청약 가능 여부를 확인해야 합니다.");
+    }
+
+    if (condition.nonHomeYears >= 10) {
+        score += 10;
+        reasons.push("무주택 기간이 10년 이상입니다.");
+    } else if (condition.nonHomeYears >= 5) {
+        score += 7;
+        reasons.push("무주택 기간이 5년 이상입니다.");
+    }
+
+    if (condition.savingsYears >= 10) {
+        score += 10;
+        reasons.push("청약통장 가입기간이 10년 이상입니다.");
+    } else if (condition.savingsYears >= 5) {
+        score += 7;
+        reasons.push("청약통장 가입기간이 5년 이상입니다.");
+    }
+
+    if (condition.family >= 4) {
+        score += 10;
+        reasons.push("부양가족 수가 많아 가점제에서 유리할 가능성이 있습니다.");
+    } else if (condition.family >= 2) {
+        score += 7;
+        reasons.push("부양가족이 있어 가점제 측면에서 일부 유리할 수 있습니다.");
+    }
+
+    const address = getAnnouncementAddress(item);
+    if (condition.region !== "전체" && address.includes(condition.region)) {
+        score += 8;
+        reasons.push("희망 지역과 공고 지역이 일치합니다.");
+    }
+
+    if (isJupJup(item)) {
+        score += 5;
+        reasons.push("무순위·잔여세대 공고입니다.");
+    }
+
+    score = Math.max(0, Math.min(100, score));
+    return { score, reasons };
+}
+
+function getScoreGrade(score) {
+    if (score >= 85) return { text: "매우 높음", className: "bg-green-100 text-green-700" };
+    if (score >= 70) return { text: "높음", className: "bg-blue-100 text-blue-700" };
+    if (score >= 55) return { text: "보통", className: "bg-yellow-100 text-yellow-700" };
+    return { text: "낮음", className: "bg-red-100 text-red-700" };
+}
+
+function getCompetitionLevel(item) {
+    if (isJupJup(item)) return { text: "관심 필요", className: "text-amber-600" };
+    return { text: "경쟁률 확인 필요", className: "text-gray-500" };
+}
+
+/* =========================================================
+   FAVORITE
+========================================================= */
+function getFavorites() {
+    try {
+        return JSON.parse(localStorage.getItem("favList") || "{}");
+    } catch (e) {
+        return {};
+    }
+}
+
+function saveFavorites(favorites) {
+    localStorage.setItem("favList", JSON.stringify(favorites));
+}
+
+function isFavorite(name) {
+    const favorites = getFavorites();
+    return !!favorites[name];
+}
+
+function toggleFavorite(name, url) {
+    const favorites = getFavorites();
+    if (favorites[name]) {
+        delete favorites[name];
+    } else {
+        favorites[name] = { url: url, savedAt: Date.now() };
+    }
+    saveFavorites(favorites);
+    renderHeaderFavorites();
+    render();
+}
+
+function renderHeaderFavorites() {
+    const container = document.getElementById("headerFavList");
+    const badge = document.getElementById("favCount");
+    const favorites = getFavorites();
+    const keys = Object.keys(favorites);
+    badge.innerText = `${keys.length}개`;
+
+    if (keys.length === 0) {
+        container.innerHTML = `<p class="text-blue-200 text-[11px] italic">등록된 관심 단지가 없습니다.</p>`;
+        return;
+    }
+
+    container.innerHTML = "";
+    keys.forEach(name => {
+        const favorite = favorites[name];
+        const url = typeof favorite === "string" ? favorite : favorite.url;
+        const row = document.createElement("div");
+        row.className = "flex items-center justify-between bg-blue-800/40 px-2 py-1.5 rounded gap-2";
+        row.innerHTML = `
+            <span class="truncate pr-2 font-medium text-white">${escapeHtml(name)}</span>
+            <a href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer" class="bg-yellow-400 hover:bg-yellow-500 text-blue-950 font-bold px-2 py-1 rounded text-[10px] whitespace-nowrap">
+                바로가기
+            </a>
+        `;
+        container.appendChild(row);
+    });
+}
+
+/* =========================================================
+   FILTER & SORT
+========================================================= */
+function applyFilter(data) {
+    const favorites = getFavorites();
+    return data.filter(item => {
+        const name = getAnnouncementName(item);
+        const dday = calculateDDay(getEndDate(item));
+
+        if (showFavoritesOnly && !favorites[name]) return false;
+        if (currentFilter === "urgent") return dday.urgent;
+        if (currentFilter === "special") return isJupJup(item);
+        if (currentFilter === "favorite") return !!favorites[name];
+        return true;
+    });
+}
+
+function sortAnnouncements(data) {
+    return data.sort((a, b) => {
+        const jupA = isJupJup(a);
+        const jupB = isJupJup(b);
+        if (jupA !== jupB) return jupB - jupA;
+
+        const ddayA = calculateDDay(getEndDate(a)).days;
+        const ddayB = calculateDDay(getEndDate(b)).days;
+        return ddayA - ddayB;
+    });
+}
+
+/* =========================================================
+   CARD CREATION & DYNAMIC MODEL LOADING
+========================================================= */
+function createCard(item, condition) {
+    const name = getAnnouncementName(item);
+    const address = getAnnouncementAddress(item);
+    const url = getAnnouncementUrl(item);
+    const start = getStartDate(item);
+    const end = getEndDate(item);
+    const houseManageNo = getHouseManageNo(item);
+    const dday = calculateDDay(end);
+    const analysis = calculateScore(item, condition);
+    const grade = getScoreGrade(analysis.score);
+    const competition = getCompetitionLevel(item);
+    const favorite = isFavorite(name);
+    const housingType = getHousingType(item);
+    const supplyType = getSupplyType(item);
+    const supplyCount = getSupplyCount(item);
+    const eligibility = getEligibility(item, condition);
+    const contractRate = getContractRate(item);
+    const resale = getResaleRestriction(item);
+    const residence = getResidenceObligation(item);
+
+    let ddayClass = "bg-gray-100 text-gray-600";
+    if (dday.days === 0) ddayClass = "bg-red-100 text-red-700";
+    else if (dday.days <= 3) ddayClass = "bg-orange-100 text-orange-700";
+    else if (dday.days <= 7) ddayClass = "bg-yellow-100 text-yellow-700";
+
+    const reasons = analysis.reasons.slice(0, 3);
+    const reasonHtml = reasons.length > 0 ? reasons.map(r => `<li class="flex gap-1.5"><span class="text-blue-500">✓</span><span>${escapeHtml(r)}</span></li>`).join("") : `<li>기본 분석되었습니다.</li>`;
+
+    const card = document.createElement("div");
+    card.className = `bg-white p-5 rounded-2xl border ${isJupJup(item) ? "border-amber-400 ring-2 ring-amber-100" : "border-gray-100"} shadow-sm flex flex-col justify-between space-y-4 card-hover ${dday.urgent ? "urgent" : ""}`;
+
+    card.innerHTML = `
+        <div>
+            <div class="flex justify-between items-start gap-3 mb-2">
+                <div class="min-w-0">
+                    <div class="flex flex-wrap gap-1.5 mb-2">
+                        ${isJupJup(item) ? `<span class="bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full text-[10px] font-bold">✨ 무순위</span>` : ""}
+                        <span class="bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full text-[10px] font-bold">${escapeHtml(housingType)}</span>
+                        <span class="bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full text-[10px] font-bold">${escapeHtml(supplyType)}</span>
                     </div>
-                `;
-            });
-        }
+                    <h2 class="font-bold text-sm text-gray-900 leading-5">${escapeHtml(name)}</h2>
+                </div>
+                <button type="button" class="favorite-btn text-2xl shrink-0" data-favorite="true" aria-label="관심공고 등록">
+                    ${favorite ? "⭐" : "☆"}
+                </button>
+            </div>
 
-        function render() {
-            renderHeaderFavorites();
+            <div class="flex flex-wrap items-center gap-2 mb-3">
+                <span class="${grade.className} px-2 py-1 rounded text-[10px] font-bold">AI 적합도 ${analysis.score}/100</span>
+                <span class="${ddayClass} px-2 py-1 rounded text-[10px] font-bold">${escapeHtml(dday.text)}</span>
+                <span class="text-[10px] font-bold ${competition.className}">경쟁도: ${escapeHtml(competition.text)}</span>
+            </div>
 
-            const container = document.getElementById('listContainer');
-            container.innerHTML = "";
-            const region = document.getElementById('userRegion').value;
-            const housing = document.getElementById('userHousing').value;
-            const family = parseInt(document.getElementById('userFamily').value) || 0;
-            
-            let favorites = JSON.parse(localStorage.getItem('favList') || '{}');
+            <p class="text-xs text-gray-500 mb-3 flex gap-1">
+                <span>📍</span>
+                <span>${escapeHtml(address)}</span>
+            </p>
 
-            const filteredData = allData.filter(item => {
-                const address = item.HSSPLY_ADRES || item.hssplyAdres || "";
-                const endDate = (item.RCEPT_ENDDE || item.rceptEndde || "99999999").replace(/[^0-9]/g, '');
-                return (endDate >= TODAY) && (region === '전체' || address.includes(region));
-            }).sort((a, b) => {
-                const jupA = (a.HOUSE_NM || "").includes("무순위");
-                const jupB = (b.HOUSE_NM || "").includes("무순위");
-                return jupB - jupA || (a.RCEPT_ENDDE || "").localeCompare(b.RCEPT_ENDDE || "");
-            });
+            <!-- 상세 정보 Grid -->
+            <div class="bg-gray-50 border border-gray-100 p-3 rounded-xl grid grid-cols-2 gap-y-3 gap-x-4 text-[11px]">
+                <div>
+                    <span class="text-gray-400 font-medium">분양가</span>
+                    <div class="font-bold text-gray-800 mt-0.5 price-field data-value">조회 중...</div>
+                </div>
+                <div>
+                    <span class="text-gray-400 font-medium">전용면적</span>
+                    <div class="font-bold text-gray-800 mt-0.5 area-field data-value">조회 중...</div>
+                </div>
+                <div>
+                    <span class="text-gray-400 font-medium">공급세대</span>
+                    <div class="font-bold text-gray-800 mt-0.5">${escapeHtml(supplyCount)}</div>
+                </div>
+                <div>
+                    <span class="text-gray-400 font-medium">청약자격</span>
+                    <div class="font-bold text-gray-800 mt-0.5">${escapeHtml(eligibility)}</div>
+                </div>
+                <div>
+                    <span class="text-gray-400 font-medium">계약금 비율</span>
+                    <div class="font-bold text-gray-800 mt-0.5">${contractRate ? escapeHtml(contractRate) : "10% (기준)"}</div>
+                </div>
+                <div>
+                    <span class="text-gray-400 font-medium flex items-center justify-between">
+                        <span>필요현금 (계약금)</span>
+                        <div class="group relative cursor-pointer inline-block">
+                            <span class="bg-blue-100 text-blue-700 text-[10px] font-bold px-1.5 py-0.5 rounded-full hover:bg-blue-200 transition">+ 세금 예상</span>
+                            <div class="absolute bottom-full right-0 mb-2 hidden group-hover:block w-52 bg-gray-900 text-white text-[10px] p-2.5 rounded-lg shadow-xl z-50 whitespace-normal">
+                                <p class="font-bold text-yellow-300 mb-1">💰 초기 필요현금 & 세금 예상</p>
+                                <p class="contract-detail text-gray-200">계약금(10%): 계산 중...</p>
+                                <p class="tax-detail text-gray-200">취등록세 등(약1.1~3.3%): 계산 중...</p>
+                                <p class="total-detail text-white font-bold mt-1 pt-1 border-t border-gray-700">총 초기 예상: 계산 중...</p>
+                            </div>
+                        </div>
+                    </span>
+                    <div class="font-bold text-blue-600 mt-0.5 cash-field">조회 중...</div>
+                </div>
+                <div>
+                    <span class="text-gray-400 font-medium">전매제한</span>
+                    <div class="font-bold text-gray-800 mt-0.5">${escapeHtml(resale)}</div>
+                </div>
+                <div>
+                    <span class="text-gray-400 font-medium">거주의무</span>
+                    <div class="font-bold text-gray-800 mt-0.5">${escapeHtml(residence)}</div>
+                </div>
+            </div>
 
-            if (filteredData.length === 0) {
-                container.innerHTML = `<div class="col-span-full bg-white p-10 rounded-2xl text-center text-gray-500 shadow-sm border text-sm">조건에 맞는 진행 중인 공고가 없습니다.</div>`;
-                return;
-            }
+            <div class="recommend-box border border-blue-100 p-3 rounded-xl mt-3">
+                <div class="text-[11px] font-bold text-blue-800 mb-2">💡 AI가 이 공고를 보는 이유</div>
+                <ul class="text-[10px] text-gray-600 space-y-1">${reasonHtml}</ul>
+            </div>
+        </div>
 
-            filteredData.forEach(item => {
-                const name = item.HOUSE_NM || item.houseNm || '정보없음';
-                const pblancUrl = item.PBLANC_URL || 'https://www.applyhome.co.kr';
-                const end = (item.RCEPT_ENDDE || "").replace(/[^0-9]/g, '');
+        <div>
+            <div class="text-[11px] bg-blue-50 text-blue-700 p-2 rounded-lg font-bold mb-2 text-center">
+                접수기간: ${escapeHtml(formatDate(start))} ~ ${escapeHtml(formatDate(end))}
+            </div>
+            <a href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer" class="${isJupJup(item) ? "bg-amber-500 hover:bg-amber-600" : "bg-blue-600 hover:bg-blue-700"} block text-center text-white py-2.5 rounded-xl text-xs font-semibold transition">
+                공고 원문 보기
+            </a>
+        </div>
+    `;
+
+    // 찜하기 이벤트 바인딩
+    card.querySelector('[data-favorite="true"]').addEventListener("click", () => {
+        toggleFavorite(name, url);
+    });
+
+    // 비동기로 모델(타입별 분양가/면적) 정보 가져와서 반영
+    fetchModelDetails(houseManageNo).then(models => {
+        const priceEl = card.querySelector(".price-field");
+        const areaEl = card.querySelector(".area-field");
+        const cashEl = card.querySelector(".cash-field");
+        const contractDetail = card.querySelector(".contract-detail");
+        const taxDetail = card.querySelector(".tax-detail");
+        const totalDetail = card.querySelector(".total-detail");
+
+        if (models && models.length > 0) {
+            const prices = models.map(m => Number(getFirstValue(m, ["LTTOT_TOP_AMOUNT", "lttotTopAmount", "PRICE", "price"]) || 0)).filter(p => p > 0);
+            const areas = models.map(m => getFirstValue(m, ["EXCLUSE_AR", "excluseAr", "AREA", "area"])).filter(a => a);
+
+            if (prices.length > 0) {
+                const minPriceMan = Math.min(...prices);
+                const maxPriceMan = Math.max(...prices);
+                priceEl.innerText = minPriceMan === maxPriceMan ? formatKoreanPrice(minPriceMan) : `${formatKoreanPrice(minPriceMan)} ~ ${formatKoreanPrice(maxPriceMan)}`;
                 
-                let dDayText = "마감";
-                if (end.length === 8) {
-                    const endDateObj = new Date(end.replace(/(\d{4})(\d{2})(\d{2})/, '$1-$2-$3'));
-                    const todayObj = new Date(TODAY.replace(/(\d{4})(\d{2})(\d{2})/, '$1-$2-$3'));
-                    const diffDays = Math.ceil((endDateObj - todayObj) / (1000 * 60 * 60 * 24));
-                    dDayText = diffDays >= 0 ? `D-${diffDays}` : "마감";
-                }
+                // 필요현금 (기본 계약금 10% 기준 원화 계산)
+                const minPriceWon = minPriceMan * 10000;
+                const contractCash = minPriceWon * 0.1;
+                
+                // 취등록세 추정 (6억 이하 ~1.1%, 9억 초과 ~3.3%)
+                let taxRate = 0.011;
+                if (minPriceWon >= 900000000) taxRate = 0.033;
+                else if (minPriceWon >= 600000000) taxRate = 0.022;
+                
+                const estimatedTax = minPriceWon * taxRate;
+                const totalNeeded = contractCash + estimatedTax;
 
-                const score = (housing === 'none' ? 3 : 1) + (family > 0 ? 2 : 0);
-                const isFav = favorites[name] !== undefined;
-                const isJupJup = name.includes("무순위");
+                cashEl.innerText = formatWonToDisplay(contractCash);
+                
+                if (contractDetail) contractDetail.innerText = `계약금(10%): ${formatWonToDisplay(contractCash)}`;
+                if (taxDetail) taxDetail.innerText = `예상 세금(~${(taxRate*100).toFixed(1)}%): ${formatWonToDisplay(estimatedTax)}`;
+                if (totalDetail) totalDetail.innerText = `총 초기 예상: ${formatWonToDisplay(totalNeeded)}`;
+            } else {
+                priceEl.innerText = "공고문 참조";
+                cashEl.innerText = "공고문 확인";
+            }
 
-                container.innerHTML += `
-                    <div class="bg-white p-5 rounded-2xl border ${isJupJup ? 'border-amber-400 ring-2 ring-amber-100' : 'border-gray-100'} shadow-sm flex flex-col justify-between space-y-4">
-                        <div>
-                            <div class="flex justify-between items-start mb-2">
-                                <h2 class="font-bold text-sm text-gray-900">${isJupJup ? '✨ 줍줍 ' : ''} ${name}</h2>
-                                <button onclick="toggleFavorite('${name}', '${pblancUrl}')" class="text-xl transition transform active:scale-125">${isFav ? '⭐' : '☆'}</button>
-                            </div>
-                            
-                            <div class="flex gap-2 text-[10px] mb-2">
-                                <span class="bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded font-bold">AI 적합도: ${score}/5점</span>
-                                <span class="bg-red-100 text-red-700 px-2 py-0.5 rounded font-bold">${dDayText}</span>
-                            </div>
-                            
-                            <p class="text-xs text-gray-500 mb-3">${item.HSSPLY_ADRES || '주소없음'}</p>
-                            
-                            <!-- 💡 8가지 상세 컨설팅 정보 그리드 -->
-                            <div class="bg-gray-50 border border-gray-100 p-3 rounded-xl grid grid-cols-2 gap-2 text-[11px]">
-                                <div><span class="text-gray-400 font-medium">분양가:</span> <span class="font-bold text-gray-800">공고문 참조</span></div>
-                                <div><span class="text-gray-400 font-medium">평형:</span> <span class="font-bold text-gray-800">전용 59~84㎡</span></div>
-                                <div><span class="text-gray-400 font-medium">당첨 가능성:</span> <span class="font-bold text-blue-600">${score >= 4 ? '높음' : '보통'}</span></div>
-                                <div><span class="text-gray-400 font-medium">필요한 현금:</span> <span class="font-bold text-gray-800">계약금 10% 필요</span></div>
-                                <div><span class="text-gray-400 font-medium">전매제한:</span> <span class="font-bold text-gray-800">1년 ~ 3년</span></div>
-                                <div><span class="text-gray-400 font-medium">거주의무:</span> <span class="font-bold text-gray-800">해당없음/3년</span></div>
-                                <div><span class="text-gray-400 font-medium">청약자격:</span> <span class="font-bold text-gray-800">${housing === 'none' ? '무주택 우선' : '유주택 가능'}</span></div>
-                            </div>
-                        </div>
-
-                        <div>
-                            <div class="text-[11px] bg-blue-50 text-blue-700 p-2 rounded font-bold mb-2 text-center">
-                                접수기간: ${item.RCEPT_BGNDE || '-'} ~ ${item.RCEPT_ENDDE || '-'}
-                            </div>
-                            <a href="${pblancUrl}" target="_blank" class="block text-center ${isJupJup ? 'bg-amber-500 hover:bg-amber-600' : 'bg-blue-600 hover:bg-blue-700'} text-white py-2 rounded-xl text-xs font-semibold transition">공고 원문 보기</a>
-                        </div>
-                    </div>
-                `;
-            });
+            if (areas.length > 0) {
+                const uniqueAreas = [...new Set(areas)];
+                areaEl.innerText = uniqueAreas.length === 1 ? uniqueAreas[0] + "㎡" : `${uniqueAreas[0]}㎡ 외`;
+            } else {
+                areaEl.innerText = "공고문 참조";
+            }
+        } else {
+            priceEl.innerText = "공고문 참조";
+            areaEl.innerText = "공고문 참조";
         }
-        fetchData();
-    </script>
+    });
+
+    return card;
+}
+
+/* =========================================================
+   FILTERED DATA & RENDER
+========================================================= */
+function getFilteredData() {
+    const condition = getUserCondition();
+    let data = allData.filter(item => {
+        const address = getAnnouncementAddress(item);
+        const endDate = normalizeDate(getEndDate(item)) || "99999999";
+        const regionMatch = condition.region === "전체" || address.includes(condition.region);
+        const dateMatch = endDate >= TODAY;
+        return regionMatch && dateMatch;
+    });
+
+    data = applyFilter(data);
+    data = sortAnnouncements(data);
+    return data;
+}
+
+function render() {
+    updateConditionSummary();
+    renderHeaderFavorites();
+
+    const container = document.getElementById("listContainer");
+    const condition = getUserCondition();
+    let filteredData = getFilteredData();
+
+    document.getElementById("resultCount").innerText = `${filteredData.length}개`;
+    container.innerHTML = "";
+
+    if (filteredData.length === 0) {
+        container.innerHTML = `
+            <div class="col-span-full bg-white p-12 rounded-2xl text-center text-gray-500 shadow-sm border">
+                <div class="text-4xl mb-3">🏠</div>
+                <p class="font-bold text-gray-700 mb-1">조건에 맞는 진행 중인 공고가 없습니다.</p>
+                <p class="text-xs text-gray-400">지역이나 관심공고 필터를 변경해보세요.</p>
+            </div>
+        `;
+        return;
+    }
+
+    filteredData.forEach(item => {
+        container.appendChild(createCard(item, condition));
+    });
+}
+
+/* =========================================================
+   API 호출
+========================================================= */
+async function fetchData() {
+    const container = document.getElementById("listContainer");
+    try {
+        const response = await fetch(API_URL);
+        if (!response.ok) throw new Error(`API HTTP 오류: ${response.status}`);
+        const json = await response.json();
+
+        if (!Array.isArray(json.data)) throw new Error("API data 배열이 없습니다.");
+
+        allData = json.data;
+        render();
+    } catch (error) {
+        console.error("청약 데이터를 불러오지 못했습니다.", error);
+        container.innerHTML = `
+            <div class="col-span-full bg-white p-10 rounded-2xl text-center border border-red-100">
+                <div class="text-4xl mb-3">⚠️</div>
+                <p class="font-bold text-red-600 mb-2">청약 데이터를 불러오지 못했습니다.</p>
+                <p class="text-xs text-gray-500 mb-4">API Key 또는 공공데이터 API 연결 상태를 확인해주세요.</p>
+                <p class="text-[10px] text-gray-400 mb-4">${escapeHtml(error.message)}</p>
+                <button type="button" id="retryBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-xs">다시 시도</button>
+            </div>
+        `;
+        const retryBtn = document.getElementById("retryBtn");
+        if (retryBtn) retryBtn.addEventListener("click", fetchData);
+    }
+}
+
+/* =========================================================
+   이벤트 리스너 등록
+========================================================= */
+document.getElementById("diagnosisBtn").addEventListener("click", render);
+document.getElementById("saveConditionBtn").addEventListener("click", saveCondition);
+document.getElementById("resetConditionBtn").addEventListener("click", resetCondition);
+
+document.getElementById("showFavoritesBtn").addEventListener("click", function () {
+    showFavoritesOnly = !showFavoritesOnly;
+    this.innerText = showFavoritesOnly ? "전체 공고 보기" : "관심공고만 보기";
+    render();
+});
+
+document.querySelectorAll(".filter-btn").forEach(button => {
+    button.addEventListener("click", function () {
+        document.querySelectorAll(".filter-btn").forEach(btn => btn.classList.remove("active"));
+        this.classList.add("active");
+        currentFilter = this.dataset.filter;
+        render();
+    });
+});
+
+["userRegion", "userNonHomeYears", "userSavingsYears", "userFamily", "userHousing"].forEach(id => {
+    document.getElementById(id).addEventListener("input", updateConditionSummary);
+    document.getElementById(id).addEventListener("change", updateConditionSummary);
+});
+
+/* =========================================================
+   초기화 실행
+========================================================= */
+document.getElementById("todayText").innerText = formatDate(TODAY);
+loadCondition();
+renderHeaderFavorites();
+fetchData();
+</script>
+
 </body>
 </html>
-<!-- recipient: wjdrms5815@gmail.com -->
-<!-- prod jg_6 -->
